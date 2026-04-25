@@ -18,10 +18,20 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    // Add this helper to User model
+    public function isAdmin(): bool {
+        return $this->role === 'admin';
+    }
+
+    public function isPatient(): bool {
+        return $this->role === 'patient';
+    }
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'role',
     ];
 
     /**
