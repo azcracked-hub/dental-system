@@ -1,46 +1,41 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Appointment;
 use App\Models\Billing;
-use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    public function index()
+    {
+        $today = now()->toDateString();
 
-    public function appointment()
-        {
-    $today = now()->toDateString();
+        $todayAppointments = Appointment::with('patient')
+            ->whereDate('date', $today)
+            ->orderBy('time')
+            ->get();
 
-    $todayAppointments = Appointment::whereDate('date', $today)->get();
+        $confirmed = Appointment::where('status', 'confirmed')->count();
+        $pending   = Appointment::where('status', 'pending')->count();
+        $completed = Appointment::where('status', 'completed')->count();
+        $canceled  = Appointment::where('status', 'canceled')->count();
 
-    $confirmed = Appointment::where('status', 'confirmed')->count();
-    $pending = Appointment::where('status', 'pending')->count();
-    $completed = Appointment::where('status', 'completed')->count();
-    $canceled = Appointment::where('status', 'canceled')->count();
+        $todayCount      = $todayAppointments->count();
+        $totalRevenue    = Billing::where('status', 'paid')->sum('amount');
+        $pendingPayments = Billing::where('status', 'unpaid')->sum('amount');
 
-    $todayCount = $todayAppointments->count();
+        $recentNotes = Appointment::with('patient')
+            ->whereNotNull('notes')
+            ->where('status', 'completed')
+            ->latest()
+            ->take(5)
+            ->get();
 
-    // FIX: define these so Blade doesn't crash
-    $totalRevenue = Billing::sum('amount');
-    $pendingPayments = Billing::where('status', 'unpaid')->sum('amount');
-
-    $recentNotes = Appointment::whereNotNull('notes')
-        ->latest()
-        ->take(5)
-        ->get();
-
-    return view('dashboards.admin', compact(
-        'confirmed',
-        'pending',
-        'completed',
-        'canceled',
-        'todayCount',
-        'totalRevenue',
-        'pendingPayments',
-        'todayAppointments',
-        'recentNotes'
-    ));
-
+        return view('dashboards.admin', compact(
+            'confirmed', 'pending', 'completed', 'canceled',
+            'todayCount', 'totalRevenue', 'pendingPayments',
+            'todayAppointments', 'recentNotes'
+        ));
     }
 }

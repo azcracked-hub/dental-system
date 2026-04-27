@@ -31,7 +31,7 @@
         {{-- Nav --}}
         <nav class="flex-1 px-3 py-4 space-y-0.5">
 
-            <a href="/dashboard"
+            <a href="{{ route('dashboard') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,8 +43,9 @@
                 Overview
             </a>
 
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
+            <a href="{{ route('appointments.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+               {{ request()->is('appointments*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
@@ -54,16 +55,18 @@
                 Appointments
             </a>
 
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
+            <a href="{{ route('clinical-notes.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+               {{ request()->is('clinical-notes*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Clinical Notes
             </a>
 
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
+            <a href="{{ route('billing.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+               {{ request()->is('billing*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
                     <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
@@ -71,8 +74,18 @@
                 Billing
             </a>
 
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
+            <a href="{{ route('patients.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+               {{ request()->is('patients*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Patients
+            </a>
+
+            <a href="{{ route('system-admin.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+               {{ request()->is('system-admin*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <circle cx="12" cy="12" r="3" stroke-width="2"/>
@@ -82,14 +95,26 @@
 
         </nav>
 
-        {{-- Profile Settings --}}
-        <div class="px-3 py-4 border-t border-gray-800">
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
+        {{-- Bottom: Profile + Logout --}}
+        <div class="px-3 py-4 border-t border-gray-800 space-y-0.5">
+            <button onclick="document.getElementById('profileModal').classList.remove('hidden')"
+                class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
                 Profile Settings
-            </a>
+            </button>
+
+            <form method="POST" action="/logout">
+                @csrf
+                <button type="submit"
+                    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-red-900/30 hover:text-red-400 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Logout
+                </button>
+            </form>
         </div>
 
     </aside>
@@ -100,29 +125,25 @@
         {{-- TOP BAR --}}
         <header class="bg-gray-900 text-white px-8 py-4 flex items-center justify-between sticky top-0 z-20">
             <div class="flex items-center gap-3">
-                <button class="text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <div class="w-8 h-8 rounded-full bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                </button>
-                <div class="ml-2">
-                    <p class="text-base font-bold leading-tight">{{ auth()->user()->name ?? 'Admin' }}</p>
-                    <p class="text-xs text-yellow-400">Clinic Owner – General Dentistry</p>
+                </div>
+                <div>
+                    <p class="text-sm font-bold leading-tight">{{ auth()->user()->name ?? 'Admin' }}</p>
+                    <p class="text-xs text-yellow-400">
+                        Clinic Owner
+                        @if(auth()->user()->specialization)
+                            — {{ auth()->user()->specialization }}
+                        @endif
+                    </p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-sm font-semibold">{{ now()->format('l') }}</p>
-                    <p class="text-xs text-gray-400">{{ now()->format('M j, Y') }}</p>
-                </div>
-                <form method="POST" action="/logout">
-                    @csrf
-                    <button type="submit"
-                            class="text-xs text-gray-400 hover:text-red-400 border border-gray-700 hover:border-red-400 px-3 py-1.5 rounded-lg transition-all">
-                        Logout
-                    </button>
-                </form>
+            <div class="text-right">
+                <p class="text-sm font-semibold">{{ now()->format('l') }}</p>
+                <p class="text-xs text-gray-400">{{ now()->format('M j, Y') }}</p>
             </div>
         </header>
 
@@ -133,6 +154,68 @@
 
     </div>
 
+</div>
+
+{{-- Profile Settings Modal --}}
+<div id="profileModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-1">
+            <div>
+                <h2 class="text-base font-bold text-gray-900">Profile Settings</h2>
+                <p class="text-sm text-gray-400">Update your personal information and credentials</p>
+            </div>
+            <button onclick="document.getElementById('profileModal').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+        </div>
+        <form action="{{ route('profile.update') }}" method="POST" class="space-y-4 mt-4">
+            @csrf @method('PATCH')
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">First Name</label>
+                    <input type="text" name="first_name"
+                        value="{{ explode(' ', auth()->user()->name)[0] ?? '' }}"
+                        class="w-full border border-yellow-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">Last Name</label>
+                    <input type="text" name="last_name"
+                        value="{{ explode(' ', auth()->user()->name, 2)[1] ?? '' }}"
+                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Email</label>
+                <input type="email" name="email" value="{{ auth()->user()->email }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Phone Number</label>
+                <input type="text" name="phone" value="{{ auth()->user()->phone }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">License Number</label>
+                <input type="text" name="license_number" value="{{ auth()->user()->license_number }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Specialization</label>
+                <input type="text" name="specialization" value="{{ auth()->user()->specialization }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+            </div>
+            <div class="flex gap-3 pt-1">
+                <button type="button"
+                    onclick="document.getElementById('profileModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-2.5 rounded-xl">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @stack('scripts')

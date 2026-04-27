@@ -2,49 +2,6 @@
 
 @section('content')
 
-{{-- Google Calendar Integration Banner --}}
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-    <div class="flex items-center gap-2 mb-1">
-        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
-            <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
-            <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
-            <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-        </svg>
-        <h2 class="text-base font-bold text-gray-900">Google Calendar Integration</h2>
-    </div>
-    <p class="text-sm text-gray-500 mb-4">Sync your schedule with Google Calendar to avoid double-booking</p>
-
-    <div class="bg-blue-50 rounded-xl p-4 mb-4">
-        <p class="text-sm font-semibold text-blue-700 mb-2">Features:</p>
-        <ul class="space-y-1">
-            <li class="text-sm text-blue-600 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Two-way sync with Google Calendar</li>
-            <li class="text-sm text-blue-600 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Automatic conflict detection</li>
-            <li class="text-sm text-blue-600 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Real-time availability updates</li>
-            <li class="text-sm text-blue-600 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Email and popup reminders</li>
-            <li class="text-sm text-blue-600 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Block time slots for personal events</li>
-        </ul>
-    </div>
-
-    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all mb-4">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-        </svg>
-        Sync with Google Calendar
-    </button>
-
-    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-        <p class="text-sm font-semibold text-yellow-700 mb-1">Setup Required: <span class="font-normal">To enable Google Calendar sync, you need to:</span></p>
-        <ol class="space-y-0.5 list-none">
-            <li class="text-sm text-yellow-600">1. Create a Google Cloud project</li>
-            <li class="text-sm text-yellow-600">2. Enable Google Calendar API</li>
-            <li class="text-sm text-yellow-600">3. Set up OAuth 2.0 credentials</li>
-            <li class="text-sm text-yellow-600">4. Add authorized redirect URIs</li>
-            <li class="text-sm text-yellow-600">5. Store credentials securely</li>
-        </ol>
-    </div>
-</div>
-
 {{-- Statistics Cards --}}
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
