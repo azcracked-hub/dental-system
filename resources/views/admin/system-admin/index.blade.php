@@ -34,20 +34,6 @@
                     <p class="text-sm font-medium text-gray-800">{{ $user->name }}</p>
                     <p class="text-xs text-gray-400">{{ $user->email }}</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs px-2.5 py-1 rounded-full font-medium
-                        {{ $user->role === 'admin' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600' }}">
-                        {{ ucfirst($user->role) }}
-                    </span>
-                    {{-- Change role button --}}
-                    <form method="POST" action="{{ route('system-admin.toggle-role', $user->id) }}">
-                        @csrf @method('PATCH')
-                        <button type="submit"
-                            class="text-xs text-gray-400 hover:text-yellow-600 border border-gray-200 hover:border-yellow-300 px-2.5 py-1 rounded-lg transition">
-                            {{ $user->role === 'admin' ? 'Set Patient' : 'Set Admin' }}
-                        </button>
-                    </form>
-                </div>
             </div>
         @endforeach
     </div>

@@ -10,7 +10,7 @@ class PatientController extends Controller
     public function index()
     {
         $patients = Patient::withCount('appointments')->orderBy('name')->get();
-        return view('patients.index', compact('patients'));
+        return view('admin.patients.index', compact('patients'));
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class PatientController extends Controller
     public function show($id)
     {
         $patient = Patient::with(['appointments', 'billings.appointment'])->findOrFail($id);
-        return view('patients.show', compact('patient'));
+        return view('admin.patients.show', compact('patient'));
     }
 
     public function update(Request $request, $id)

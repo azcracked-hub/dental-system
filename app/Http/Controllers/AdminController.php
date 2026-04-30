@@ -7,6 +7,7 @@ use App\Models\Billing;
 
 class AdminController extends Controller
 {
+
     public function index()
     {
         $today = now()->toDateString();

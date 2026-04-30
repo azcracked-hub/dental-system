@@ -4,7 +4,7 @@
 
 {{-- Back button --}}
 <div class="mb-5">
-    <a href="{{ route('patients.index') }}"
+    <a href="{{ route('admin.patients.index') }}"
         class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -133,7 +133,7 @@
             <button onclick="document.getElementById('editPatientModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
-        <form action="{{ route('patients.update', $patient->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.patients.update', $patient->id) }}" method="POST" class="space-y-4">
             @csrf @method('PATCH')
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>

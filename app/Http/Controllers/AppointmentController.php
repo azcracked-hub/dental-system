@@ -14,7 +14,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::with('patient')->latest('date')->get();
         $patients     = Patient::orderBy('name')->get();
 
-        return view('appointments.index', compact('appointments', 'patients'));
+        return view('admin.appointments.index', compact('appointments', 'patients'));
     }
 
     public function store(Request $request)

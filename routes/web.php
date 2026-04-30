@@ -18,7 +18,7 @@ Route::get('/login',     [AuthController::class, 'showLogin']);
 Route::post('/login',    [AuthController::class, 'login']);
 Route::post('/logout',   [AuthController::class, 'logout']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
@@ -47,8 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
     // System Admin
-    Route::get('/system-admin',                        [SystemAdminController::class, 'index'])->name('system-admin.index');
-    Route::patch('/system-admin/{id}/toggle-role',     [SystemAdminController::class, 'toggleRole'])->name('system-admin.toggle-role');
+    Route::get('/system-admin',[SystemAdminController::class, 'index'])->name('system-admin.index');
 
     // Profile
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -11,7 +11,7 @@ class BillingController extends Controller
     public function index()
     {
         $billings = Billing::with(['patient', 'appointment'])->latest()->get();
-        return view('billing.index', compact('billings'));
+        return view('admin.billing.index', compact('billings'));
     }
 
     public function store(Request $request)

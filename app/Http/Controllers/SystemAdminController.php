@@ -14,15 +14,6 @@ class SystemAdminController extends Controller
         $totalPatients     = Patient::count();
         $totalAppointments = Appointment::count();
 
-        return view('system-admin.index', compact('users', 'totalPatients', 'totalAppointments'));
+        return view('admin.system-admin.index', compact('users', 'totalPatients', 'totalAppointments'));
     }
-    public function toggleRole($id)
-{
-    $user = User::findOrFail($id);
-    $user->update([
-        'role' => $user->role === 'admin' ? 'patient' : 'admin'
-    ]);
-
-    return back()->with('success', 'User role updated successfully.');
-}
 }

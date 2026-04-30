@@ -31,9 +31,9 @@
         {{-- Nav --}}
         <nav class="flex-1 px-3 py-4 space-y-0.5">
 
-            <a href="{{ route('dashboard') }}"
+            <a href="{{ route('admin.dashboard') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+               {{ request()->is('admin.dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7" stroke-width="2" rx="1"/>
                     <rect x="14" y="3" width="7" height="7" stroke-width="2" rx="1"/>
@@ -43,7 +43,7 @@
                 Overview
             </a>
 
-            <a href="{{ route('appointments.index') }}"
+            <a href="{{ route('admin.appointments.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('appointments*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@
                 Appointments
             </a>
 
-            <a href="{{ route('clinical-notes.index') }}"
+            <a href="{{ route('admin.clinical-notes.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('clinical-notes*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@
                 Clinical Notes
             </a>
 
-            <a href="{{ route('billing.index') }}"
+            <a href="{{ route('admin.billing.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('billing*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@
                 Billing
             </a>
 
-            <a href="{{ route('patients.index') }}"
+            <a href="{{ route('admin.patients.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('patients*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
                 Patients
             </a>
 
-            <a href="{{ route('system-admin.index') }}"
+            <a href="{{ route('admin.system-admin.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                {{ request()->is('system-admin*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@
             <button onclick="document.getElementById('profileModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
         </div>
-        <form action="{{ route('profile.update') }}" method="POST" class="space-y-4 mt-4">
+        <form action="{{ route('admin.profile.update') }}" method="POST" class="space-y-4 mt-4">
             @csrf @method('PATCH')
             <div class="grid grid-cols-2 gap-3">
                 <div>

@@ -102,7 +102,7 @@
             <h2 class="text-base font-bold text-gray-900">New Appointment</h2>
             <button onclick="document.getElementById('createModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
-        <form action="{{ route('appointments.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.appointments.store') }}" method="POST" class="space-y-4">
             @csrf
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Patient</label>
@@ -155,7 +155,6 @@
         <p id="notesSubtitle" class="text-sm text-gray-400 mb-4"></p>
         <form id="notesForm" method="POST" class="space-y-4">
             @csrf
-            @method('POST')
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Clinical Notes</label>
                 <textarea name="notes" rows="4" required placeholder="Enter your clinical notes and recommendations..."
@@ -179,7 +178,7 @@
             <button onclick="document.getElementById('billingModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
         <p id="billingSubtitle" class="text-sm text-gray-400 mb-4"></p>
-        <form action="{{ route('billing.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.billing.store') }}" method="POST" class="space-y-4">
             @csrf
             <input type="hidden" name="appointment_id" id="billingAppointmentId">
             <div>
@@ -203,8 +202,15 @@
 @push('scripts')
 <script>
 function openNotesModal(id, patient, service) {
-    document.getElementById('notesSubtitle').textContent = 'Add notes for ' + patient + ' - ' + service;
-    document.getElementById('notesForm').action = '/appointments/' + id + '/complete';
+    document.getElementById('notesSubtitle').textContent =
+        'Add notes for ' + patient + ' - ' + service;
+
+    let url = "{{ route('admin.appointments.complete', ':id') }}";
+    url = url.replace(':id', id);
+    console.log(url);
+
+    document.getElementById('notesForm').action = url;
+
     document.getElementById('notesModal').classList.remove('hidden');
 }
 

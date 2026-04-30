@@ -14,6 +14,6 @@ class ClinicalNoteController extends Controller
             ->latest()
             ->get();
 
-        return view('clinical-notes.index', compact('notes'));
+        return view('admin.clinical-notes.index', compact('notes'));
     }
 }

@@ -38,11 +38,11 @@
             </div>
             <div class="flex items-center gap-3">
                 <span class="text-xs text-gray-400">{{ $patient->appointments_count }} appointment(s)</span>
-                <a href="{{ route('patients.show', $patient->id) }}"
+                <a href="{{ route('admin.patients.show', $patient->id) }}"
                     class="text-xs border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-lg transition">
                     View
                 </a>
-                <form method="POST" action="{{ route('patients.destroy', $patient->id) }}"
+                <form method="POST" action="{{ route('admin.patients.destroy', $patient->id) }}"
                     onsubmit="return confirm('Delete this patient?')">
                     @csrf @method('DELETE')
                     <button type="submit"
@@ -70,7 +70,7 @@
             <button onclick="document.getElementById('createPatientModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
-        <form action="{{ route('patients.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.patients.store') }}" method="POST" class="space-y-4">
             @csrf
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>

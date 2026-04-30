@@ -61,7 +61,7 @@
                         class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-2.5 rounded-xl transition">
                         Mark as Paid
                     </button>
-                    <form action="{{ route('billing.destroy', $bill->id) }}" method="POST">
+                    <form action="{{ route('admin.billing.destroy', $bill->id) }}" method="POST">
                         @csrf @method('DELETE')
                         <button type="submit" onclick="return confirm('Delete this billing record?')"
                             class="border border-red-200 text-red-400 hover:bg-red-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition">
@@ -114,7 +114,10 @@
 @push('scripts')
 <script>
 function openMarkPaidModal(id) {
-    document.getElementById('markPaidForm').action = '/billing/' + id + '/mark-paid';
+    let url = "{{ route('admin.billing.markPaid', ':id') }}";
+    url = url.replace(':id', id);
+
+    document.getElementById('markPaidForm').action = url;
     document.getElementById('markPaidModal').classList.remove('hidden');
 }
 </script>

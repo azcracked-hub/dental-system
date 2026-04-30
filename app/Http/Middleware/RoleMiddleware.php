@@ -6,12 +6,16 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AuthMiddleware
+class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, string ...$roles)
     {
         if (!Auth::check()) {
             return redirect('/login');
+        }
+
+        if (!in_array(Auth::user()->role, $roles)) {
+            return redirect('/dashboard');
         }
 
         return $next($request);
