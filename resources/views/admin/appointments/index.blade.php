@@ -72,7 +72,7 @@
 
                     {{-- Create Billing --}}
                     <button
-                        onclick="openBillingModal({{ $appt->id }}, '{{ addslashes($appt->patient->name ?? '') }}', '{{ addslashes($appt->service->name ?? '') }}')"
+                       onclick="openBillingModal({{ $appt->id }},'{{ addslashes($appt->patient->name ?? '') }}','{{ addslashes($appt->service->name ?? '') }}',{{ $appt->service->price ?? 0 }})"
                         class="flex-1 flex items-center justify-center gap-2 border border-yellow-400 text-yellow-500 hover:bg-yellow-50 text-sm font-semibold py-2.5 rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <rect x="1" y="4" width="22" height="16" rx="2" stroke-width="2"/>
@@ -229,9 +229,11 @@ function openNotesModal(id, patient, service) {
     document.getElementById('notesModal').classList.remove('hidden');
 }
 
-function openBillingModal(id, patient, service) {
-    document.getElementById('billingSubtitle').textContent = 'Create billing for ' + patient + ' - ' + service;
+function openBillingModal(id, patient, service, price) {
+    document.getElementById('billingSubtitle').textContent =
+        'Create billing for ' + patient + ' - ' + service;
     document.getElementById('billingAppointmentId').value = id;
+    document.querySelector('#billingModal input[name="amount"]').value = price;
     document.getElementById('billingModal').classList.remove('hidden');
 }
 </script>

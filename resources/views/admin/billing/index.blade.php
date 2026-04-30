@@ -103,7 +103,10 @@
                 <button type="button" onclick="document.getElementById('markPaidModal').classList.add('hidden')"
                     class="flex-1 border border-gray-200 text-gray-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50">Cancel</button>
                 <button type="submit"
-                    class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-2.5 rounded-xl">Confirm Payment</button>
+                    onclick="this.disabled=true; this.form.submit();"
+                    class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-2.5 rounded-xl">
+                    Confirm Payment
+                </button>
             </div>
         </form>
     </div>

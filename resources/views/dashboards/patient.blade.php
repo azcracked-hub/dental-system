@@ -52,14 +52,26 @@
                     {{ $nextAppointment->status }}
                 </span>
             </div>
-            <form method="POST" action="{{ route('patient.appointments.cancel', $nextAppointment->id) }}">
-                @csrf @method('PATCH')
-                <button type="submit"
-                        onclick="return confirm('Cancel this appointment?')"
-                        class="text-sm text-red-500 border border-red-300 hover:bg-red-50 px-4 py-1.5 rounded-lg transition-all">
-                    Cancel Appointment
-                </button>
-            </form>
+            @if($nextAppointment->status === 'completed')
+                <span class="text-sm text-green-600 font-semibold">
+                    ✔ Appointment Completed
+                </span>
+            @elseif($nextAppointment->status === 'canceled')
+                <span class="text-sm text-red-500 font-semibold">
+                    ✖ Appointment Canceled
+                </span>
+            @else
+                <form method="POST" action="{{ route('patient.appointments.cancel', $nextAppointment->id) }}">
+                    @csrf
+                    @method('PATCH')
+
+                    <button type="submit"
+                            onclick="return confirm('Cancel this appointment?')"
+                            class="text-sm text-red-500 border border-red-300 hover:bg-red-50 px-4 py-1.5 rounded-lg transition-all">
+                        Cancel Appointment
+                    </button>
+                </form>
+            @endif
         @else
             <div class="flex flex-col items-center justify-center py-10 text-gray-400">
                 <svg class="w-14 h-14 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,83 +172,79 @@
     <h2 class="text-base font-bold text-gray-900 mb-1">All Appointments</h2>
     <p class="text-sm text-gray-400 mb-4">{{ $appointments->count() }} total appointments</p>
 
-    @forelse($appointments as $appt)
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-3 border-l-4
-            @if($appt->status === 'confirmed') border-l-green-400
-            @elseif($appt->status === 'pending') border-l-yellow-400
-            @elseif($appt->status === 'completed') border-l-blue-400
-            @else border-l-red-400 @endif">
+@forelse($appointments as $appt)
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 border-l-4
+        @if($appt->status === 'confirmed') border-l-green-400
+        @elseif($appt->status === 'pending') border-l-yellow-400
+        @elseif($appt->status === 'completed') border-l-blue-400
+        @else border-l-red-400 @endif">
 
-            {{-- Service + Status Badge --}}
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-3">
-                    <h3 class="text-sm font-bold text-gray-900">
-                        {{ $appt->service->name ?? $appt->service }}
-                    </h3>
-                    <span class="text-xs px-2.5 py-0.5 rounded-full font-medium
-                        @if($appt->status === 'confirmed') bg-green-100 text-green-700
-                        @elseif($appt->status === 'pending') bg-yellow-100 text-yellow-700
-                        @elseif($appt->status === 'completed') bg-blue-100 text-blue-700
-                        @else bg-red-100 text-red-700 @endif">
-                        {{ $appt->status }}
-                    </span>
-                </div>
-            </div>
-
-            {{-- Doctor --}}
-            <p class="text-xs text-gray-500 flex items-center gap-1.5 mb-3">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                Dr. {{ $appt->doctor->name ?? 'Estandarte' }}
-            </p>
-
-            {{-- Date + Time --}}
-            <div class="flex items-center gap-6 text-xs text-gray-500 pb-3 border-b border-gray-50">
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
-                        <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
-                        <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-                    </svg>
-                    {{ \Carbon\Carbon::parse($appt->date)->format('M d, Y') }}
-                </span>
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                        <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    {{ $appt->time }}
+        {{-- Service + Status Badge --}}
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+                <h3 class="text-sm font-bold text-gray-900">
+                    {{ $appt->service->name ?? $appt->service }}
+                </h3>
+                <span class="text-xs px-2.5 py-0.5 rounded-full font-medium
+                    @if($appt->status === 'confirmed') bg-green-100 text-green-700
+                    @elseif($appt->status === 'pending') bg-yellow-100 text-yellow-700
+                    @elseif($appt->status === 'completed') bg-blue-100 text-blue-700
+                    @else bg-red-100 text-red-700 @endif">
+                    {{ $appt->status }}
                 </span>
             </div>
-
-            {{-- Cancel Button --}}
-            @if(in_array($appt->status, ['confirmed', 'pending']))
-                <form method="POST"
-                      action="{{ route('patient.appointments.cancel', $appt->id) }}"
-                      class="mt-3">
-                    @csrf @method('PATCH')
-                    <button type="submit"
-                            onclick="return confirm('Cancel this appointment?')"
-                            class="text-xs text-red-500 border border-red-300 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">
-                        Cancel Appointment
-                    </button>
-                </form>
-            @endif
         </div>
-    @empty
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/>
-                <line x1="16" y1="2" x2="16" y2="6" stroke-width="1.5"/>
-                <line x1="8" y1="2" x2="8" y2="6" stroke-width="1.5"/>
-                <line x1="3" y1="10" x2="21" y2="10" stroke-width="1.5"/>
+
+        {{-- Doctor --}}
+        <p class="text-xs text-gray-500 flex items-center gap-1.5 mb-3">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            <p class="text-sm">No appointments yet</p>
+            Dr. {{ $appt->doctor->name ?? 'Estandarte' }}
+        </p>
+
+        {{-- Date + Time --}}
+        <div class="flex items-center gap-6 text-xs text-gray-500 pb-3 border-b border-gray-50">
+            <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                </svg>
+                {{ \Carbon\Carbon::parse($appt->date)->format('M d, Y') }}
+            </span>
+
+            <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {{ $appt->time }}
+            </span>
         </div>
-    @endforelse
+
+        {{-- Cancel Button --}}
+        @if($appt->status !== 'completed' && $appt->status !== 'canceled')
+            <form method="POST"
+                  action="{{ route('patient.appointments.cancel', $appt->id) }}"
+                  class="mt-3">
+                @csrf @method('PATCH')
+
+                <button type="submit"
+                        onclick="return confirm('Cancel this appointment?')"
+                        class="text-xs text-red-500 border border-red-300 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">
+                    Cancel Appointment
+                </button>
+            </form>
+        @endif
+    </div>
+@empty
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center text-gray-400">
+        <p class="text-sm">No appointments yet</p>
+    </div>
+@endforelse
 </div>
 
 {{-- TAB: Doctor Notes --}}

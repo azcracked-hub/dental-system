@@ -22,6 +22,12 @@ class BillingController extends Controller
             'appointment_id' => 'required|exists:appointments,id',
             'amount' => 'nullable|numeric|min:0',
         ]);
+        
+        $existing = Billing::where('appointment_id', $request->appointment_id)->first();
+
+        if ($existing) {
+            return back()->with('success', 'Billing already exists for this appointment.');
+        }
 
         $appointment = Appointment::with(['patient', 'service'])->findOrFail($request->appointment_id);
 

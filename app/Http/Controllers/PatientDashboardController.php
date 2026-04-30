@@ -96,11 +96,22 @@ class PatientDashboardController extends Controller
     {
         $patientId = Auth::user()->patient->id;
 
-        Appointment::where('id', $id)
+        $appointment = Appointment::where('id', $id)
             ->where('patients_id', $patientId)
-            ->firstOrFail()
-            ->update(['status' => 'canceled']);
+            ->firstOrFail();
 
-        return back()->with('success', 'Appointment cancelled.');
+        if ($appointment->status === 'completed') {
+            return back()->with('error', 'Completed appointments cannot be cancelled.');
+        }
+
+        if ($appointment->status === 'canceled') {
+            return back()->with('error', 'Appointment is already cancelled.');
+        }
+
+        $appointment->update([
+            'status' => 'canceled'
+        ]);
+
+        return back()->with('success', 'Appointment cancelled successfully.');
     }
 }

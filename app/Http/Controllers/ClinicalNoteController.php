@@ -11,7 +11,7 @@ class ClinicalNoteController extends Controller
     {
         $user = Auth::user();
 
-        $clinicalNotes = Appointment::with(['service', 'doctor'])
+        $clinicalNotes = Appointment::with(['service', 'doctor', 'patient'])
             ->where('patients_id', $user->id)
             ->whereNotNull('notes')
             ->where('status', 'completed')

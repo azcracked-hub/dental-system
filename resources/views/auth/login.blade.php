@@ -124,24 +124,6 @@
                 Sign In
             </button>
         </form>
-
-        {{-- Demo accounts --}}
-        <div class="mt-6 bg-[#FAFAF7] border border-gray-200 rounded-xl px-4 py-3.5 text-left">
-            <p class="text-xs text-gray-400 mb-2">Demo Accounts:</p>
-            <p class="text-xs mb-1">
-                <span class="font-bold text-[#B08800]">Patient:</span>
-                <span class="text-gray-500"> john.doe@email.com / patient123</span>
-            </p>
-            <p class="text-xs mb-1">
-                <span class="font-bold text-[#7B6000]">Doctor:</span>
-                <span class="text-gray-500"> dr.estandarte@dentalclinic.com / doctor123</span>
-            </p>
-            <p class="text-xs">
-                <span class="font-bold text-[#A67C00]">Staff:</span>
-                <span class="text-gray-500"> anna.reyes@dentalclinic.com / staff123</span>
-            </p>
-        </div>
-
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
