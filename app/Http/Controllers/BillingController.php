@@ -34,7 +34,7 @@ class BillingController extends Controller
         return back()->with('success', 'Billing record created.');
     }
 
-    public function markPaid(Request $request, $id)
+    public function markPaid(Request $request, int $id)
     {
         $billing = Billing::findOrFail($id);
         $billing->update([
@@ -45,7 +45,7 @@ class BillingController extends Controller
         return back()->with('success', 'Marked as paid.');
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
         Billing::findOrFail($id)->delete();
         return back()->with('success', 'Billing record deleted.');

@@ -11,11 +11,11 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string ...$roles)
     {
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect()->route('login');
         }
 
         if (!in_array(Auth::user()->role, $roles)) {
-            return redirect('/dashboard');
+            return redirect()->route('login');
         }
 
         return $next($request);

@@ -9,7 +9,8 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClinicalNoteController;
 use App\Http\Controllers\SystemAdminController;
-
+use App\Http\Controllers\PatientDashboardController;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -32,15 +33,26 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | Dashboard (MAIN ENTRY)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth'])->get('/dashboard', function () {
-    return redirect()->route('admin.dashboard');
+
+    if (!session()->has('login_web_' . Auth::id())) {
+        Auth::logout();
+        return redirect('/login');
+    }
+
+    $user = Auth::user();
+
+    return match ($user->role) {
+        'admin', 'doctor', 'staff' => redirect()->route('admin.dashboard'),
+        'patient' => redirect()->route('patient.dashboard'),
+        default => redirect('/login'),
+    };
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes (NO ROLE)
+| Admin Routes
 |--------------------------------------------------------------------------
 */
 
@@ -66,15 +78,26 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/billing/{id}',          [BillingController::class, 'destroy'])->name('billing.destroy');
 
     // Patients
-    Route::get('/patients',         [PatientController::class, 'index'])->name('patients.index');
-    Route::post('/patients',        [PatientController::class, 'store'])->name('patients.store');
-    Route::get('/patients/{id}',    [PatientController::class, 'show'])->name('patients.show');
-    Route::patch('/patients/{id}',  [PatientController::class, 'update'])->name('patients.update');
-    Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+    Route::patch('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
+    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
     // System Admin
     Route::get('/system-admin', [SystemAdminController::class, 'index'])->name('system-admin.index');
 
     // Profile
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+Route::middleware(['auth', 'role:patient'])
+    ->prefix('patient')
+    ->name('patient.')
+    ->group(function () {
+
+    Route::get('/dashboard',                  [PatientDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/appointments/book',          [PatientDashboardController::class, 'book'])->name('appointments.book');
+    Route::post('/appointments',              [PatientDashboardController::class, 'store'])->name('appointments.store');
+    Route::patch('/appointments/{id}/cancel', [PatientDashboardController::class, 'cancel'])->name('appointments.cancel');
 });

@@ -133,7 +133,7 @@
             <button onclick="document.getElementById('editPatientModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
-        <form action="{{ route('admin.patients.update', $patient->id) }}" method="POST" class="space-y-4">
+        <form action="{{ route('admin.patients.update', $patient) }}" method="POST" class="space-y-4">
             @csrf @method('PATCH')
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>

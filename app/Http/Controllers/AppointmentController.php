@@ -21,7 +21,8 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'patients_id' => 'required|exists:patients,id',
-            'service'     => 'required|string|max:255',
+            'doctor_id'   => 'required|exists:users,id',
+            'service_id'  => 'required|exists:services,id',
             'date'        => 'required|date',
             'time'        => 'required',
             'notes'       => 'nullable|string',
@@ -29,7 +30,8 @@ class AppointmentController extends Controller
 
         Appointment::create([
             'patients_id' => $request->patients_id,
-            'service'     => $request->service,
+            'doctor_id'   => $request->doctor_id,
+            'service_id'  => $request->service_id,
             'date'        => $request->date,
             'time'        => $request->time,
             'status'      => 'pending',
@@ -39,7 +41,7 @@ class AppointmentController extends Controller
         return back()->with('success', 'Appointment created successfully.');
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request,int $id)
     {
         $appointment = Appointment::findOrFail($id);
         $request->validate(['status' => 'required|in:pending,confirmed,completed,canceled']);
@@ -49,7 +51,7 @@ class AppointmentController extends Controller
     }
 
     // Called from "Complete & Add Notes" modal
-    public function complete(Request $request, $id)
+    public function complete(Request $request, int $id)
     {
         $request->validate(['notes' => 'required|string']);
 
@@ -62,7 +64,7 @@ class AppointmentController extends Controller
         return back()->with('success', 'Appointment completed and notes saved.');
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
         Appointment::findOrFail($id)->delete();
         return back()->with('success', 'Appointment deleted.');

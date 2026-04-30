@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
         [
             'name'     => 'Dr. Mary Cris Estandarte',
             'password' => bcrypt('password'),
+            'role'     => 'admin',
             'phone'    => '+63 945 678 9012',
         ]
     );

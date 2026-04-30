@@ -42,7 +42,7 @@
                     class="text-xs border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-lg transition">
                     View
                 </a>
-                <form method="POST" action="{{ route('admin.patients.destroy', $patient->id) }}"
+                <form method="POST" action="{{ route('admin.patients.destroy', $patient) }}"
                     onsubmit="return confirm('Delete this patient?')">
                     @csrf @method('DELETE')
                     <button type="submit"
@@ -86,6 +86,11 @@
                 <label class="text-sm font-medium text-gray-700 block mb-1">Phone</label>
                 <input type="text" name="phone" placeholder="+63 9XX XXX XXXX"
                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Password</label>
+                <input type="password" name="password" required placeholder="Set password"
+                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Address</label>
