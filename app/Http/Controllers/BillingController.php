@@ -10,25 +10,27 @@ class BillingController extends Controller
 {
     public function index()
     {
-        $billings = Billing::with(['patient', 'appointment'])->latest()->get();
+        $billings = Billing::with(['patient', 'appointment.service'])
+            ->latest()
+            ->get();
+
         return view('admin.billing.index', compact('billings'));
     }
-
     public function store(Request $request)
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
-            'amount'         => 'required|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
         ]);
 
-        $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
+        $appointment = Appointment::with(['patient', 'service'])->findOrFail($request->appointment_id);
 
         Billing::create([
             'appointment_id' => $appointment->id,
             'patients_id'    => $appointment->patients_id,
-            'amount'         => $request->amount,
+            'amount'         => $request->amount ?? $appointment->service->price,
             'status'         => 'unpaid',
-            'description'    => $appointment->service,
+            'description'    => $appointment->service->name,
         ]);
 
         return back()->with('success', 'Billing record created.');

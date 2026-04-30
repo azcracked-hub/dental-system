@@ -29,6 +29,10 @@ class User extends Authenticatable
     public function isPatient(): bool {
         return $this->role === 'patient';
     }
+    public function patient()
+    {
+        return $this->hasOne(Patient::class, 'email', 'email');
+    }
     protected $fillable = [
         'name',
         'email',

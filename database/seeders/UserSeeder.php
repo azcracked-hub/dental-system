@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         ['email' => 'admin@dentalclinic.com'],
         [
             'name'     => 'Dr. Mary Cris Estandarte',
-            'password' => bcrypt('password'),
+            'password' => bcrypt('123456'),
             'role'     => 'admin',
             'phone'    => '+63 945 678 9012',
         ]

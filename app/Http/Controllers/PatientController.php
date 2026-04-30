@@ -9,11 +9,21 @@ use Illuminate\Support\Facades\Hash;
 
 class PatientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $patients = Patient::withCount('appointments')
-            ->orderBy('name')
-            ->get();
+        $query = Patient::withCount('appointments')->orderBy('name');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $patients = $query->get();
 
         return view('admin.patients.index', compact('patients'));
     }
@@ -27,7 +37,7 @@ class PatientController extends Controller
             'address'  => 'nullable|string|max:255',
             'password' => 'required|min:6',
         ]);
-        
+
         User::create([
             'name'     => $request->name,
             'email'    => $request->email,

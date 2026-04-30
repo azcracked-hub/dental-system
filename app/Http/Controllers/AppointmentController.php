@@ -11,10 +11,18 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::with('patient')->latest('date')->get();
-        $patients     = Patient::orderBy('name')->get();
+        $appointments = Appointment::with(['patient', 'service', 'doctor'])
+            ->latest('date')
+            ->get();
 
-        return view('admin.appointments.index', compact('appointments', 'patients'));
+        $patients = Patient::orderBy('name')->get();
+        $services = \App\Models\Service::orderBy('name')->get(); // ADD THIS
+
+        return view('admin.appointments.index', compact(
+            'appointments',
+            'patients',
+            'services'
+        ));
     }
 
     public function store(Request $request)

@@ -11,13 +11,35 @@
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-xl font-bold text-gray-900">Patients</h1>
-        <p class="text-sm text-gray-400">{{ $patients->count() }} total patients</p>
+        <p class="text-sm text-gray-400">
+            {{ $patients->count() }} result(s)
+            @if(request('search'))
+                for "{{ request('search') }}"
+            @endif
+        </p>
     </div>
     <button onclick="document.getElementById('createPatientModal').classList.remove('hidden')"
         class="bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
         + Add Patient
     </button>
 </div>
+
+{{-- ✅ SEARCH BAR --}}
+<form method="GET" action="{{ route('admin.patients.index') }}" class="mb-4">
+    <div class="flex gap-2">
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Search name, email, or phone..."
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300"
+        >
+        <button type="submit"
+            class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm hover:bg-gray-800">
+            Search
+        </button>
+    </div>
+</form>
 
 <div class="space-y-3">
     @forelse($patients as $patient)
@@ -57,7 +79,7 @@
             <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <p class="text-sm">No patients yet</p>
+            <p class="text-sm">No patients found</p>
         </div>
     @endforelse
 </div>

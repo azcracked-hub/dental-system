@@ -91,10 +91,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-Route::middleware(['auth', 'role:patient'])
-    ->prefix('patient')
-    ->name('patient.')
-    ->group(function () {
+Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')->group(function () {
 
     Route::get('/dashboard',                  [PatientDashboardController::class, 'index'])->name('dashboard');
     Route::get('/appointments/book',          [PatientDashboardController::class, 'book'])->name('appointments.book');

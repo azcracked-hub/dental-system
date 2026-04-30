@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Appointment;
 
 class ClinicalNoteController extends Controller
 {
     public function index()
     {
-        $notes = Appointment::with('patient')
+        $user = Auth::user();
+
+        $clinicalNotes = Appointment::with(['service', 'doctor'])
+            ->where('patients_id', $user->id)
             ->whereNotNull('notes')
             ->where('status', 'completed')
             ->latest()
             ->get();
 
-        return view('admin.clinical-notes.index', compact('notes'));
+        return view('admin.clinical-notes.index', compact('clinicalNotes'));
     }
 }

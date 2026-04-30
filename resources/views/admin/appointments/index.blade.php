@@ -25,12 +25,11 @@
         <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
             <div class="flex items-start justify-between mb-3">
                 <div>
-                    <h3 class="text-base font-semibold text-gray-900">{{ $appt->service ?? 'Appointment' }}</h3>
-                    <p class="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                        {{ $appt->patient->name ?? 'N/A' }}
+                    <h3 class="text-base font-semibold text-gray-900">
+                    {{ $appt->service->name ?? 'No Service' }}
+                    </h3>
+                    <p class="text-xs text-gray-400">
+                        {{ $appt->service->duration_minutes ?? 0 }} mins • ₱{{ number_format($appt->service->price ?? 0, 2) }}
                     </p>
                 </div>
                 <span class="text-xs px-2.5 py-1 rounded-full font-medium
@@ -63,7 +62,7 @@
                 <div class="flex gap-3">
                     {{-- Complete & Add Notes --}}
                     <button
-                        onclick="openNotesModal({{ $appt->id }}, '{{ addslashes($appt->patient->name ?? '') }}', '{{ addslashes($appt->service ?? '') }}')"
+                        onclick="openNotesModal({{ $appt->id }}, '{{ addslashes($appt->patient->name ?? '') }}', '{{ addslashes($appt->service->name ?? '') }}')"
                         class="flex-1 flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-2.5 rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -73,7 +72,7 @@
 
                     {{-- Create Billing --}}
                     <button
-                        onclick="openBillingModal({{ $appt->id }}, '{{ addslashes($appt->patient->name ?? '') }}', '{{ addslashes($appt->service ?? '') }}')"
+                        onclick="openBillingModal({{ $appt->id }}, '{{ addslashes($appt->patient->name ?? '') }}', '{{ addslashes($appt->service->name ?? '') }}')"
                         class="flex-1 flex items-center justify-center gap-2 border border-yellow-400 text-yellow-500 hover:bg-yellow-50 text-sm font-semibold py-2.5 rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <rect x="1" y="4" width="22" height="16" rx="2" stroke-width="2"/>
@@ -113,11 +112,27 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="text-sm font-medium text-gray-700 block mb-1">Service / Treatment</label>
-                <input type="text" name="service" required placeholder="e.g. Dental Cleaning"
-                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
-            </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">Doctor</label>
+                    <select name="doctor_id" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                        <option value="">Select doctor  </option>
+
+                        @foreach(\App\Models\User::where('role','admin')->get() as $admin)
+                            <option value="{{ $admin->id }}">
+                                {{ $admin->name }} (Doctor)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <select name="service_id" required class="w-full border rounded-xl px-3 py-2.5 text-sm">
+                    <option value="">Select Service</option>
+
+                    @foreach($services as $service)
+                        <option value="{{ $service->id }}">
+                            {{ $service->name }} • {{ $service->duration_minutes }} mins • ₱{{ number_format($service->price, 2) }}
+                        </option>
+                    @endforeach
+                </select>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">Date</label>

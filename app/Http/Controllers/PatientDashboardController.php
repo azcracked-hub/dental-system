@@ -14,36 +14,43 @@ class PatientDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $patientId = $user->patient->id;
 
         return view('dashboards.patient', [
-            'nextAppointment' => Appointment::where('patients_id', $user->id)
+            'nextAppointment' => Appointment::where('patients_id', $patientId)
                 ->where('date', '>=', today())
                 ->whereNotIn('status', ['canceled'])
-                ->orderBy('date')->orderBy('time')
+                ->orderBy('date')
+                ->orderBy('time')
                 ->first(),
 
-            'appointments'   => Appointment::where('patients_id', $user->id)
-                ->latest('date')->get(),
+            'appointments' => Appointment::where('patients_id', $patientId)
+                ->latest('date')
+                ->get(),
 
-            'totalVisits'    => Appointment::where('patients_id', $user->id)
-                ->where('status', 'completed')->count(),
+            'totalVisits' => Appointment::where('patients_id', $patientId)
+                ->where('status', 'completed')
+                ->count(),
 
-            'pendingBalance' => Billing::where('patients_id', $user->id)
-                ->where('status', 'unpaid')->sum('amount'),
+            'pendingBalance' => Billing::where('patients_id', $patientId)
+                ->where('status', 'unpaid')
+                ->sum('amount'),
 
-            'unpaidBills'    => Billing::where('patients_id', $user->id)
-                ->where('status', 'unpaid')->count(),
+            'unpaidBills' => Billing::where('patients_id', $patientId)
+                ->where('status', 'unpaid')
+                ->count(),
 
-            'clinicalNotes'  => Appointment::where('patients_id', $user->id)
+            'clinicalNotes' => Appointment::where('patients_id', $patientId)
                 ->whereNotNull('notes')
                 ->where('status', 'completed')
-                ->latest()->get(),
+                ->latest()
+                ->get(),
 
-            'billings'       => Billing::where('patients_id', $user->id)
-                ->latest()->get(),
+            'billings' => Billing::where('patients_id', $patientId)
+                ->latest()
+                ->get(),
         ]);
     }
-
     public function book()
     {
         return view('patient.appointments.book', [
@@ -63,13 +70,22 @@ class PatientDashboardController extends Controller
 
         $service = Service::findOrFail($request->service_id);
 
-        Appointment::create([
-            'patients_id' => Auth::id(),
+        $appointment = Appointment::create([
+            'patients_id' => Auth::user()->patient->id,
             'doctor_id'   => $request->doctor_id,
-            'service_id' => $service->id,
+            'service_id'  => $service->id,
             'date'        => $request->date,
             'time'        => $request->time,
             'status'      => 'pending',
+        ]);
+
+        // AUTO CREATE BILLING (minimal addition)
+        Billing::create([
+            'appointment_id' => $appointment->id,
+            'patients_id' => Auth::user()->patient->id,
+            'amount'         => $service->price,
+            'status'         => 'unpaid',
+            'description'    => $service->name,
         ]);
 
         return redirect('/patient/dashboard')
@@ -78,8 +94,10 @@ class PatientDashboardController extends Controller
 
     public function cancel(int $id)
     {
+        $patientId = Auth::user()->patient->id;
+
         Appointment::where('id', $id)
-            ->where('patients_id', Auth::id())
+            ->where('patients_id', $patientId)
             ->firstOrFail()
             ->update(['status' => 'canceled']);
 
