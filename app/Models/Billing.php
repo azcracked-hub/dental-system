@@ -5,7 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Billing extends Model {
-    protected $fillable = ['appointment_id', 'patients_id', 'amount', 'status', 'description', 'due_date'];
+    protected $fillable = [
+    'appointment_id',
+    'patients_id',
+    'amount',
+    'status',
+    'description',
+    'due_date',
+    'payment_method'
+];
 
     public function patient()
     {

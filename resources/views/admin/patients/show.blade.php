@@ -67,6 +67,55 @@
         </div>
     </div>
 </div>
+{{-- Edit Patient Modal --}}
+<div id="editPatientModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold">Edit Patient</h2>
+
+            <button onclick="document.getElementById('editPatientModal').classList.add('hidden')"
+                class="text-gray-500 hover:text-gray-800">
+                ✕
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.patients.update', $patient->id) }}">
+            @csrf
+            @method('PATCH')
+
+            <div class="space-y-3">
+
+                <input type="text" name="name" value="{{ $patient->name }}"
+                    class="w-full border rounded-xl p-2" placeholder="Name">
+
+                <input type="email" name="email" value="{{ $patient->email }}"
+                    class="w-full border rounded-xl p-2" placeholder="Email">
+
+                <input type="text" name="phone" value="{{ $patient->phone }}"
+                    class="w-full border rounded-xl p-2" placeholder="Phone">
+
+                <input type="text" name="address" value="{{ $patient->address }}"
+                    class="w-full border rounded-xl p-2" placeholder="Address">
+
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button"
+                    onclick="document.getElementById('editPatientModal').classList.add('hidden')"
+                    class="px-4 py-2 text-sm border rounded-xl">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="px-4 py-2 text-sm bg-yellow-500 text-white rounded-xl">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
 
 {{-- Appointment History --}}
 <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
@@ -147,5 +196,6 @@
         @endforelse
     </div>
 </div>
+
 
 @endsection

@@ -95,7 +95,7 @@
                 <label class="text-sm font-medium text-gray-700 block mb-1">Payment Method</label>
                 <select name="payment_method" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
                     <option value="cash">Cash</option>
-                    <option value="GCash">GCash</option>
+                    <option value="gcash">GCash</option>
                     <option value="bank_transfer">Bank Transfer</option>
                 </select>
             </div>

@@ -19,7 +19,7 @@ class PatientDashboardController extends Controller
         return view('dashboards.patient', [
             'nextAppointment' => Appointment::where('patients_id', $patientId)
                 ->where('date', '>=', today())
-                ->whereNotIn('status', ['canceled'])
+                ->whereNotIn('status', ['cancelled'])
                 ->orderBy('date')
                 ->orderBy('time')
                 ->first(),
@@ -104,12 +104,12 @@ class PatientDashboardController extends Controller
             return back()->with('error', 'Completed appointments cannot be cancelled.');
         }
 
-        if ($appointment->status === 'canceled') {
+        if ($appointment->status === 'cancelled') {
             return back()->with('error', 'Appointment is already cancelled.');
         }
 
         $appointment->update([
-            'status' => 'canceled'
+            'status' => 'cancelled'
         ]);
 
         return back()->with('success', 'Appointment cancelled successfully.');

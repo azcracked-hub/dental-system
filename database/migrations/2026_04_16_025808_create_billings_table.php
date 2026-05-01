@@ -19,6 +19,7 @@ return new class extends Migration
         $table->string('status')->default('unpaid');
         $table->text('description')->nullable();
         $table->date('due_date')->nullable();
+        $table->string('payment_method')->nullable();
         $table->timestamps();
     });
     }

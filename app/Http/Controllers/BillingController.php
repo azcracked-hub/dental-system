@@ -22,7 +22,7 @@ class BillingController extends Controller
             'appointment_id' => 'required|exists:appointments,id',
             'amount' => 'nullable|numeric|min:0',
         ]);
-        
+
         $existing = Billing::where('appointment_id', $request->appointment_id)->first();
 
         if ($existing) {
@@ -45,9 +45,19 @@ class BillingController extends Controller
     public function markPaid(Request $request, int $id)
     {
         $billing = Billing::findOrFail($id);
+
+        // normalize ALL payment methods to snake_case
+        $method = strtolower($request->payment_method);
+
+        $allowed = ['cash', 'gcash', 'bank_transfer'];
+
+        if (!in_array($method, $allowed)) {
+            $method = 'cash';
+        }
+
         $billing->update([
-            'status'         => 'paid',
-            'payment_method' => $request->payment_method ?? 'cash',
+            'status' => 'paid',
+            'payment_method' => $method,
         ]);
 
         return back()->with('success', 'Marked as paid.');

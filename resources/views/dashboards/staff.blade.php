@@ -154,13 +154,19 @@
                                     <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-blue-200">completed</span>
                                 @elseif($apt->status == 'pending')
                                     <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-200">pending</span>
+                               @elseif($apt->status == 'cancelled')
+                                    <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-red-200">
+                                        cancelled
+                                    </span>
                                 @else
-                                    <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-red-200">cancelled</span>
+                                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-gray-200">
+                                        {{ $apt->status }}
+                                    </span>
                                 @endif
                             </div>
 
                             <!-- Cancel Button (Only if not completed or cancelled) -->
-                            @if(!in_array($apt->status, ['completed', 'canceled']))
+                            @if($apt->status === 'pending' || $apt->status === 'confirmed')
                                 <form action="{{ route('staff.appointments.cancel', $apt->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
                                     @csrf
                                     @method('PUT')
@@ -237,11 +243,15 @@
                             <h4 class="font-bold text-gray-800">{{ $bill->appointment->service->name ?? $bill->description }}</h4>
                             <p class="text-sm text-gray-500 mt-1">{{ $bill->patient->name ?? 'Unknown' }} &bull; {{ \Carbon\Carbon::parse($bill->created_at)->format('F d, Y') }}</p>
                         </div>
-                        @if($bill->status == 'paid')
-                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-200">paid</span>
-                        @else
-                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-red-200">unpaid</span>
-                        @endif
+                            @php
+                                $status = strtolower($bill->status ?? 'unpaid');
+                            @endphp
+
+                            @if($status === 'paid')
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-200">paid</span>
+                            @else
+                                <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-red-200">unpaid</span>
+                            @endif
                     </div>
 
                     <div class="grid grid-cols-2 text-sm">
@@ -249,7 +259,20 @@
                         <div class="text-right font-medium text-gray-800">₱{{ number_format($bill->amount, 0) }}</div>
 
                         <div class="text-gray-500 mt-2">Payment Method:</div>
-                        <div class="text-right font-medium text-gray-800 mt-2">{{ ucfirst($bill->payment_method ?? 'N/A') }}</div>
+                        @php
+                            $method = strtolower($bill->payment_method ?? 'n/a');
+
+                            $methodLabel = match($method) {
+                                'cash' => 'Cash',
+                                'gcash' => 'GCash',
+                                'bank_transfer', 'bank transfer', 'bank' => 'Bank Transfer',
+                                default => ucfirst(str_replace('_', ' ', $method)),
+                            };
+                        @endphp
+
+                        <div class="text-right font-medium text-gray-800 mt-2">
+                            {{ $methodLabel }}
+                        </div>
                     </div>
                 </div>
             @endforeach

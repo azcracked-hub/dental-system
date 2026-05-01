@@ -47,7 +47,7 @@ class StaffDashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('staff.index', compact(
+        return view('dashboards.staff', compact(
             'stats',
             'todayAppointments',
             'allAppointments',
@@ -83,11 +83,15 @@ class StaffDashboardController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        if (in_array($appointment->status, ['completed', 'canceled'])) {
-            return back()->with('error', 'Cannot cancel a completed or already canceled appointment.');
+        if ($appointment->status === 'completed') {
+            return back()->with('error', 'Completed appointments cannot be cancelled.');
+}
+        if (in_array($appointment->status, ['completed', 'cancelled'])) {
+            return back()->with('error', 'Cannot cancel a completed or already cancelled appointment.');
         }
 
-        $appointment->update(['status' => 'canceled']);
+
+        $appointment->update(['status' => 'cancelled']);
 
         return back()->with('success', 'Appointment has been cancelled successfully.');
     }

@@ -24,7 +24,7 @@
                         {{ $nextAppointment->service->name ?? $nextAppointment->service }}
                     </h2>
                     <p class="text-sm text-gray-500 mb-3">
-                        with Dr. {{ $nextAppointment->doctor->name ?? 'Estandarte' }}
+                        with {{ $nextAppointment->doctor->name ?? 'Estandarte' }}
                     </p>
                     <div class="flex items-center gap-4 text-sm text-gray-500">
                         <span class="flex items-center gap-1.5">
@@ -55,9 +55,15 @@
             <form method="POST" action="{{ route('patient.appointments.cancel', $nextAppointment->id) }}">
                 @csrf @method('PATCH')
                 <button type="submit"
-                        onclick="return confirm('Cancel this appointment?')"
-                        class="text-sm text-red-500 border border-red-300 hover:bg-red-50 px-4 py-1.5 rounded-lg transition-all">
-                    Cancel Appointment
+                    {{ in_array($nextAppointment->status, ['completed', 'cancelled']) ? 'disabled' : '' }}
+                    onclick="return confirm('Cancel this appointment?')"
+                    class="text-sm px-4 py-1.5 rounded-lg transition-all
+                    {{ in_array($nextAppointment->status, ['completed', 'cancelled'])
+                        ? 'text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed'
+                        : 'text-red-500 border border-red-300 hover:bg-red-50' }}">
+                    {{ in_array($nextAppointment->status, ['completed', 'cancelled'])
+                        ? 'Cannot Cancel'
+                        : 'Cancel Appointment' }}
                 </button>
             </form>
         @else
@@ -187,7 +193,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                Dr. {{ $appt->doctor->name ?? 'Estandarte' }}
+                 {{ $appt->doctor->name ?? 'Estandarte' }}
             </p>
 
             {{-- Date left / Time right --}}
@@ -213,13 +219,20 @@
             {{-- Cancel Button --}}
             @if(in_array($appt->status, ['confirmed', 'pending']))
                 <form method="POST"
-                      action="{{ route('patient.appointments.cancel', $appt->id) }}"
-                      class="mt-3">
+                    action="{{ route('patient.appointments.cancel', $appt->id) }}"
+                    class="mt-3">
                     @csrf @method('PATCH')
+
                     <button type="submit"
-                            onclick="return confirm('Cancel this appointment?')"
-                            class="text-xs text-red-500 border border-red-300 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">
-                        Cancel Appointment
+                        {{ in_array($appt->status, ['completed', 'cancelled']) ? 'disabled' : '' }}
+                        class="text-xs px-3 py-1.5 rounded-lg transition-all
+                        {{ in_array($appt->status, ['completed', 'cancelled'])
+                            ? 'text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed pointer-events-none opacity-70'
+                            : 'text-red-500 border border-red-300 hover:bg-red-50' }}">
+
+                        {{ in_array($appt->status, ['completed', 'cancelled'])
+                            ? 'Cannot Cancel'
+                            : 'Cancel Appointment' }}
                     </button>
                 </form>
             @endif
@@ -259,7 +272,7 @@
                 </span>
             </div>
             <p class="text-xs text-gray-500 mb-3">
-                Dr. {{ $note->doctor->name ?? 'N/A' }}
+                 {{ $note->doctor->name ?? 'N/A' }}
             </p>
             <div class="bg-gray-50 rounded-xl p-4">
                 <p class="text-sm text-gray-700 leading-relaxed">
