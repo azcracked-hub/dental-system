@@ -11,6 +11,7 @@ use App\Http\Controllers\ClinicalNoteController;
 use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\PatientDashboardController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\StaffDashboardController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -43,7 +44,8 @@ Route::middleware(['auth'])->get('/dashboard', function () {
     $user = Auth::user();
 
     return match ($user->role) {
-        'admin', 'doctor', 'staff' => redirect()->route('admin.dashboard'),
+        'admin', 'doctor' => redirect()->route('admin.dashboard'),
+        'staff' => redirect()->route('staff.dashboard'),
         'patient' => redirect()->route('patient.dashboard'),
         default => redirect('/login'),
     };
@@ -56,7 +58,7 @@ Route::middleware(['auth'])->get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
@@ -97,4 +99,20 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
     Route::get('/appointments/book',          [PatientDashboardController::class, 'book'])->name('appointments.book');
     Route::post('/appointments',              [PatientDashboardController::class, 'store'])->name('appointments.store');
     Route::patch('/appointments/{id}/cancel', [PatientDashboardController::class, 'cancel'])->name('appointments.cancel');
+});
+
+Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+
+    // Dashboard UI
+    Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
+
+    // Appointments
+    Route::get('/appointments', [StaffDashboardController::class, 'appointments'])->name('appointments.index');
+    Route::put('/appointments/{id}/cancel', [StaffDashboardController::class, 'cancelAppointment'])->name('appointments.cancel');
+
+    // Patients
+    Route::get('/patients', [StaffDashboardController::class, 'patients'])->name('patients.index');
+
+    // Billing
+    Route::get('/billing', [StaffDashboardController::class, 'billing'])->name('billing.index');
 });
