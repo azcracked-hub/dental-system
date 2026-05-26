@@ -37,7 +37,7 @@
         <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <h3 class="text-base font-semibold text-gray-900">{{ $bill->appointment->service->name ?? $bill->description ?? 'Billing' }}</h3>
+                    <h3 class="text-base font-semibold text-gray-900">{{ $bill->appointment?->service?->name ?? $bill->description ?? 'Billing' }}</h3>
                     <p class="text-sm text-gray-500">{{ $bill->patient->name ?? 'N/A' }}</p>
                     <div class="mt-2 space-y-0.5 text-xs text-gray-400">
                         <p>Date: {{ \Carbon\Carbon::parse($bill->created_at)->format('M d, Y') }}</p>

@@ -1,2 +1,9 @@
 @import "tailwindcss";
 @import "flowbite";
+
+@source "../views/**/*.blade.php";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+
+[x-cloak] {
+    display: none !important;
+}

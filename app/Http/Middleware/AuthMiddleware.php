@@ -10,13 +10,7 @@ class AuthMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        if (!$request->session()->has('login_web_' . Auth::id())) {
-            Auth::logout();
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 

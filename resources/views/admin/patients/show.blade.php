@@ -135,7 +135,7 @@
             <div class="flex items-start justify-between py-3 border-b border-gray-50 last:border-0">
                 <div>
                     <p class="text-sm font-semibold text-gray-900">
-                        {{ $appt->service->name ?? 'Appointment' }}
+                        {{ $appt->serviceNames() }}
                     </p>
 
                     <p class="text-xs text-gray-400 mt-1">

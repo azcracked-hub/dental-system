@@ -21,7 +21,7 @@
             <div class="flex items-start justify-between mb-3">
                 <div>
                     <h2 class="text-xl font-bold text-gray-900 mb-1">
-                        {{ $nextAppointment->service->name ?? $nextAppointment->service }}
+                        {{ $nextAppointment->serviceNames() }}
                     </h2>
                     <p class="text-sm text-gray-500 mb-3">
                         with {{ $nextAppointment->doctor->name ?? 'Estandarte' }}
@@ -55,13 +55,13 @@
             <form method="POST" action="{{ route('patient.appointments.cancel', $nextAppointment->id) }}">
                 @csrf @method('PATCH')
                 <button type="submit"
-                    {{ in_array($nextAppointment->status, ['completed', 'cancelled']) ? 'disabled' : '' }}
+                    {{ in_array($nextAppointment->status, ['completed', 'canceled']) ? 'disabled' : '' }}
                     onclick="return confirm('Cancel this appointment?')"
                     class="text-sm px-4 py-1.5 rounded-lg transition-all
-                    {{ in_array($nextAppointment->status, ['completed', 'cancelled'])
+                    {{ in_array($nextAppointment->status, ['completed', 'canceled'])
                         ? 'text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed'
                         : 'text-red-500 border border-red-300 hover:bg-red-50' }}">
-                    {{ in_array($nextAppointment->status, ['completed', 'cancelled'])
+                    {{ in_array($nextAppointment->status, ['completed', 'canceled'])
                         ? 'Cannot Cancel'
                         : 'Cancel Appointment' }}
                 </button>
@@ -164,7 +164,7 @@
 {{-- TAB: My Appointments --}}
 <div id="panel-appointments">
     <h2 class="text-base font-bold text-gray-900 mb-1">All Appointments</h2>
-    <p class="text-sm text-gray-400 mb-4">{{ $appointments->count() }} total appointments</p>
+    <p class="text-sm text-gray-400 mb-4">{{ $appointments->total() }} total appointments</p>
 
     @forelse($appointments as $appt)
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-3 border-l-4
@@ -176,7 +176,7 @@
             {{-- Service + Status Badge --}}
             <div class="flex items-center gap-3 mb-2">
                 <h3 class="text-sm font-bold text-gray-900">
-                    {{ $appt->service->name ?? $appt->service }}
+                    {{ $appt->serviceNames() }}
                 </h3>
                 <span class="text-xs px-2.5 py-0.5 rounded-full font-medium
                     @if($appt->status === 'confirmed') bg-green-100 text-green-700
@@ -224,13 +224,13 @@
                     @csrf @method('PATCH')
 
                     <button type="submit"
-                        {{ in_array($appt->status, ['completed', 'cancelled']) ? 'disabled' : '' }}
+                        {{ in_array($appt->status, ['completed', 'canceled']) ? 'disabled' : '' }}
                         class="text-xs px-3 py-1.5 rounded-lg transition-all
-                        {{ in_array($appt->status, ['completed', 'cancelled'])
+                        {{ in_array($appt->status, ['completed', 'canceled'])
                             ? 'text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed pointer-events-none opacity-70'
                             : 'text-red-500 border border-red-300 hover:bg-red-50' }}">
 
-                        {{ in_array($appt->status, ['completed', 'cancelled'])
+                        {{ in_array($appt->status, ['completed', 'canceled'])
                             ? 'Cannot Cancel'
                             : 'Cancel Appointment' }}
                     </button>
@@ -248,6 +248,8 @@
             <p class="text-sm">No appointments yet</p>
         </div>
     @endforelse
+
+    <x-list-pagination :paginator="$appointments->appends(['tab' => 'appointments'])" />
 </div>
 
 {{-- TAB: Doctor Notes --}}
@@ -264,7 +266,7 @@
                                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     <h3 class="text-sm font-bold text-gray-900">
-                        {{ $note->service->name ?? 'Service' }}
+                        {{ $note->serviceNames() }}
                     </h3>
                 </div>
                 <span class="text-xs text-gray-400">
@@ -351,6 +353,13 @@ function switchTab(tab) {
     activeBtn.classList.add('active-tab');
     activeBtn.classList.remove('inactive-tab');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab && document.getElementById('panel-' + tab)) {
+        switchTab(tab);
+    }
+});
 </script>
 <style>
     .active-tab {

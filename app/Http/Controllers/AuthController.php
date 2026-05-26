@@ -4,22 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    // Show Register Page
     public function showRegister()
     {
         if (Auth::check()) {
             return redirect('/dashboard');
         }
+
         return view('auth.register');
     }
 
-    // Register User — creates account then goes back to login
     public function register(Request $request)
     {
         $request->validate([
@@ -27,37 +28,38 @@ class AuthController extends Controller
             'last_name'  => 'required|string|max:255',
             'email'      => 'required|email|unique:users,email',
             'phone'      => 'nullable|string|max:20',
-            'password'   => 'required|min:6',
+            'password'   => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
 
-        $user = User::create([
-            'name'     => $request->first_name . ' ' . $request->last_name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'password' => Hash::make($request->password),
-            'role'     => 'patient',
-        ]);
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name'     => $request->first_name.' '.$request->last_name,
+                'email'    => $request->email,
+                'phone'    => $request->phone,
+                'password' => Hash::make($request->password),
+                'role'     => 'patient',
+            ]);
 
-
-        \App\Models\Patient::create([
-            'name'  => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-        ]);
+            Patient::create([
+                'user_id' => $user->id,
+                'name'    => $user->name,
+                'email'   => $user->email,
+                'phone'   => $user->phone,
+            ]);
+        });
 
         return redirect('/login')->with('success', 'Account created! Please sign in.');
     }
 
-    // Show Login Page
     public function showLogin()
     {
         if (Auth::check()) {
             return redirect('/dashboard');
         }
+
         return view('auth.login');
     }
 
-    // Login User — goes to dashboard on success
     public function login(Request $request)
     {
         $request->validate([
@@ -67,26 +69,18 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
 
-        $request->session()->put('login_web_' . Auth::id(), true);
-
-        return redirect('/dashboard');
-    }
-
-        return back()->with('error', 'Invalid email or password.')
-                     ->withInput($request->only('email'));
-    }
-
-    // Logout
-    public function logout(Request $request)
-    {
-        // remove session flag
-        if (Auth::check()) {
-            $request->session()->forget('login_web_' . Auth::id());
+            return redirect('/dashboard');
         }
 
+        return back()->with('error', 'Invalid email or password.')
+            ->withInput($request->only('email'));
+    }
+
+    public function logout(Request $request)
+    {
         Auth::logout();
 
         $request->session()->invalidate();

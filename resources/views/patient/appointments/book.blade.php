@@ -38,21 +38,23 @@
 
 {{-- STEP 1: Select Service --}}
 <div id="step-1" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-    <h2 class="text-base font-bold text-gray-900 mb-1">Select Service</h2>
-    <p class="text-sm text-gray-400 mb-5">Choose the dental service you need</p>
+    <h2 class="text-base font-bold text-gray-900 mb-1">Select Services</h2>
+    <p class="text-sm text-gray-400 mb-2">Choose 1 to 3 dental services — you are not required to pick all three.</p>
+    <p id="service-count-label" class="text-xs font-semibold text-blue-600 mb-4">0 selected — pick at least 1 to continue</p>
 
     <div class="space-y-2">
         @foreach($services as $service)
-            <div class="service-item flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
-                 data-id="{{ $service->id }}"
-                 data-name="{{ $service->name }}"
-                 onclick="selectService(this)">
-                <div>
+            <label class="service-item flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+                <input type="checkbox" value="{{ $service->id }}"
+                    class="service-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                    data-name="{{ $service->name }}"
+                    data-price="{{ $service->price }}">
+                <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-900">{{ $service->name }}</p>
                     <p class="text-xs text-gray-400">{{ $service->duration_minutes }} minutes</p>
                 </div>
-                <span class="text-sm font-bold text-blue-600">₱{{ number_format($service->price, 0) }}</span>
-            </div>
+                <span class="text-sm font-bold text-blue-600 shrink-0">₱{{ number_format($service->price, 0) }}</span>
+            </label>
         @endforeach
     </div>
 
@@ -159,10 +161,10 @@
         </button>
         <form method="POST" action="{{ route('patient.appointments.store') }}" class="flex-1" id="booking-form">
             @csrf
-            <input type="hidden" name="service_id" id="input-service-id">
-            <input type="hidden" name="doctor_id"  id="input-doctor-id">
-            <input type="hidden" name="date"        id="input-date">
-            <input type="hidden" name="time"        id="input-time">
+            <div id="service-ids-container"></div>
+            <input type="hidden" name="doctor_id" id="input-doctor-id">
+            <input type="hidden" name="date" id="input-date">
+            <input type="hidden" name="time" id="input-time">
             <button type="submit" id="btn-confirm" disabled
                     class="w-full py-3 rounded-xl text-sm font-semibold bg-blue-200 text-blue-400 cursor-not-allowed transition-all">
                 Confirm Booking
@@ -175,7 +177,7 @@
 
 @push('scripts')
 <script>
-let selectedService = null;
+let selectedServices = [];
 let selectedDoctor  = null;
 let selectedDate    = null;
 let selectedTime    = null;
@@ -187,21 +189,61 @@ const timeSlots = [
     '16:00','16:30','17:00'
 ];
 
-// ── Service selection ────────────────────────────────────────
-function selectService(el) {
-    document.querySelectorAll('.service-item').forEach(i => {
-        i.classList.remove('border-blue-500', 'bg-blue-50');
-        i.classList.add('border-gray-200');
+function updateServiceSelectionUI() {
+    const count = selectedServices.length;
+    const label = document.getElementById('service-count-label');
+    if (label) {
+        label.textContent = count === 0
+            ? '0 selected — pick at least 1 to continue'
+            : count + ' service' + (count > 1 ? 's' : '') + ' selected (max 3)';
+    }
+
+    document.querySelectorAll('.service-item').forEach(item => {
+        const checkbox = item.querySelector('.service-checkbox');
+        const isSelected = checkbox && checkbox.checked;
+        item.classList.toggle('border-blue-500', isSelected);
+        item.classList.toggle('bg-blue-50', isSelected);
+        item.classList.toggle('border-gray-200', !isSelected);
     });
-    el.classList.add('border-blue-500', 'bg-blue-50');
-    el.classList.remove('border-gray-200');
-    selectedService = { id: el.dataset.id, name: el.dataset.name };
-    document.getElementById('input-service-id').value = el.dataset.id;
+
+    const container = document.getElementById('service-ids-container');
+    container.innerHTML = '';
+    selectedServices.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'service_ids[]';
+        input.value = id;
+        container.appendChild(input);
+    });
 
     const btn = document.getElementById('btn-step1-continue');
-    btn.disabled = false;
-    btn.className = 'w-full py-3 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-all';
+    if (count > 0) {
+        btn.disabled = false;
+        btn.className = 'w-full py-3 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-all';
+    } else {
+        btn.disabled = true;
+        btn.className = 'w-full py-3 rounded-xl text-sm font-semibold bg-blue-200 text-blue-400 cursor-not-allowed transition-all';
+    }
 }
+
+document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function () {
+        const id = this.value;
+        if (this.checked) {
+            if (selectedServices.length >= 3) {
+                this.checked = false;
+                alert('You can select up to 3 services only.');
+                return;
+            }
+            if (!selectedServices.includes(id)) {
+                selectedServices.push(id);
+            }
+        } else {
+            selectedServices = selectedServices.filter(s => s !== id);
+        }
+        updateServiceSelectionUI();
+    });
+});
 
 // ── Doctor selection ─────────────────────────────────────────
 function selectDoctor(el) {

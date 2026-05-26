@@ -137,11 +137,22 @@
             </div>
 
             {{-- Password --}}
-            <div class="text-left mb-5">
+            <div class="text-left mb-4">
                 <label for="password" class="block text-xs font-semibold text-gray-800 mb-1.5">Password</label>
                 <input type="password"
                        id="password"
                        name="password"
+                       placeholder="••••••••"
+                       class="w-full px-4 py-3 bg-[#FAFAFA] border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-300 outline-none transition-all"
+                       required>
+                @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="text-left mb-5">
+                <label for="password_confirmation" class="block text-xs font-semibold text-gray-800 mb-1.5">Confirm Password</label>
+                <input type="password"
+                       id="password_confirmation"
+                       name="password_confirmation"
                        placeholder="••••••••"
                        class="w-full px-4 py-3 bg-[#FAFAFA] border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-300 outline-none transition-all"
                        required>

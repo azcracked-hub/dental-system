@@ -2,42 +2,50 @@
 
 namespace Database\Seeders;
 
+use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // ADMIN
-        \App\Models\User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@dentalclinic.com'],
             [
                 'name'     => 'Dr. Mary Cris Estandarte',
-                'password' => bcrypt('123456'),
+                'password' => bcrypt('Password1'),
                 'role'     => 'admin',
                 'phone'    => '+63 945 678 9012',
             ]
         );
 
-        // STAFF
-        \App\Models\User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'staff@dentalclinic.com'],
             [
                 'name'     => 'Clinic Staff',
-                'password' => bcrypt('123456'),
+                'password' => bcrypt('Password1'),
                 'role'     => 'staff',
                 'phone'    => '+63 912 345 6789',
             ]
         );
 
-        // PATIENT
-        \App\Models\User::updateOrCreate(
+        $patientUser = User::updateOrCreate(
             ['email' => 'patient@dentalclinic.com'],
             [
                 'name'     => 'Juan Dela Cruz',
-                'password' => bcrypt('123456'),
+                'password' => bcrypt('Password1'),
                 'role'     => 'patient',
                 'phone'    => '+63 923 456 7890',
+            ]
+        );
+
+        Patient::updateOrCreate(
+            ['email' => $patientUser->email],
+            [
+                'user_id' => $patientUser->id,
+                'name'    => $patientUser->name,
+                'phone'   => $patientUser->phone,
             ]
         );
     }

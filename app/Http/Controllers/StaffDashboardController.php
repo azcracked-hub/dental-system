@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\Patient;
@@ -10,12 +9,7 @@ use Illuminate\Http\Request;
 
 class StaffDashboardController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD (UI)
-    |--------------------------------------------------------------------------
-    */
-    public function index()
+    public function index(Request $request)
     {
         $today = now()->toDateString();
 
@@ -27,21 +21,21 @@ class StaffDashboardController extends Controller
             'unpaid_count' => Billing::where('status', 'unpaid')->count(),
         ];
 
-        $todayAppointments = Appointment::with(['patient', 'doctor', 'service'])
+        $todayAppointments = Appointment::with(['patient', 'doctor', 'service', 'services'])
             ->whereDate('date', $today)
             ->where('status', 'confirmed')
             ->orderBy('time')
             ->get();
 
-        $allAppointments = Appointment::with(['patient', 'doctor', 'service'])
+        $allAppointments = Appointment::with(['patient', 'doctor', 'service', 'services'])
             ->latest('date')
-            ->get();
+            ->paginate(15, pageName: 'appointments_page');
 
         $patients = Patient::withCount([
             'appointments as total_appointments',
-            'appointments as confirmed_count' => fn($q) => $q->where('status', 'confirmed'),
-            'appointments as completed_count' => fn($q) => $q->where('status', 'completed')
-        ])->orderBy('name')->get();
+            'appointments as confirmed_count' => fn ($q) => $q->where('status', 'confirmed'),
+            'appointments as completed_count' => fn ($q) => $q->where('status', 'completed'),
+        ])->orderBy('name')->paginate(15, pageName: 'patients_page');
 
         $billings = Billing::with(['patient', 'appointment.service'])
             ->latest()
@@ -56,23 +50,17 @@ class StaffDashboardController extends Controller
         ));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | APPOINTMENTS (API / AJAX)
-    |--------------------------------------------------------------------------
-    */
     public function appointments(Request $request)
     {
-        $query = Appointment::with(['patient', 'doctor', 'service'])->latest('date');
+        $query = Appointment::with(['patient', 'doctor', 'service', 'services'])->latest('date');
 
         if ($request->filled('search')) {
             $search = $request->search;
 
-            // FIXED: grouped search logic
             $query->where(function ($q) use ($search) {
-                $q->whereHas('patient', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('doctor', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('service', fn($q2) => $q2->where('name', 'like', "%{$search}%"));
+                $q->whereHas('patient', fn ($q2) => $q2->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('doctor', fn ($q2) => $q2->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('service', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -83,40 +71,26 @@ class StaffDashboardController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->status === 'completed') {
-            return back()->with('error', 'Completed appointments cannot be cancelled.');
-}
-        if (in_array($appointment->status, ['completed', 'cancelled'])) {
-            return back()->with('error', 'Cannot cancel a completed or already cancelled appointment.');
+        if (in_array($appointment->status, ['completed', 'canceled'], true)) {
+            return back()->with('error', 'Cannot cancel a completed or already canceled appointment.');
         }
 
+        $appointment->update(['status' => 'canceled']);
 
-        $appointment->update(['status' => 'cancelled']);
-
-        return back()->with('success', 'Appointment has been cancelled successfully.');
+        return back()->with('success', 'Appointment has been canceled successfully.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PATIENTS (READ ONLY)
-    |--------------------------------------------------------------------------
-    */
     public function patients()
     {
         $patients = Patient::withCount([
             'appointments as total_appointments',
-            'appointments as confirmed_count' => fn($q) => $q->where('status', 'confirmed'),
-            'appointments as completed_count' => fn($q) => $q->where('status', 'completed')
+            'appointments as confirmed_count' => fn ($q) => $q->where('status', 'confirmed'),
+            'appointments as completed_count' => fn ($q) => $q->where('status', 'completed'),
         ])->orderBy('name')->get();
 
         return response()->json($patients);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | BILLING (READ ONLY)
-    |--------------------------------------------------------------------------
-    */
     public function billing()
     {
         $billings = Billing::with(['patient', 'appointment.service'])

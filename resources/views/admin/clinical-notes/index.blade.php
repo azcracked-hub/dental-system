@@ -13,11 +13,6 @@
 
 @forelse($clinicalNotes as $note)
 
-    @php
-        $service = $note->service;
-        $patient = $note->patient;
-    @endphp
-
     <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition">
 
         <div class="flex items-start justify-between mb-4">
@@ -25,21 +20,19 @@
             <div>
 
                 <h3 class="text-base font-semibold text-gray-900">
-                    {{ $service->name ?? 'Clinical Note' }}
+                    {{ $note->serviceNames() }}
                 </h3>
 
                 <p class="text-sm text-gray-500 mt-1">
                     Patient:
                     <span class="font-medium text-gray-700">
-                        {{ $patient->name ?? 'N/A' }}
+                        {{ $note->patient->name ?? 'N/A' }}
                     </span>
                 </p>
 
-                @if($service)
-                    <p class="text-xs text-gray-400 mt-1">
-                        {{ $service->duration_minutes }} mins • ₱{{ number_format($service->price, 2) }}
-                    </p>
-                @endif
+                <p class="text-xs text-gray-400 mt-1">
+                    {{ $note->totalServiceDuration() }} mins • ₱{{ number_format($note->totalServicePrice(), 2) }}
+                </p>
 
             </div>
 

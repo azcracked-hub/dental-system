@@ -31,7 +31,38 @@ class User extends Authenticatable
     }
     public function patient()
     {
-        return $this->hasOne(Patient::class, 'email', 'email');
+        return $this->hasOne(Patient::class);
+    }
+
+    public static function doctors()
+    {
+        return static::where('role', 'admin')->orderBy('name');
+    }
+
+    public function resolvePatientRecord(): Patient
+    {
+        $existing = $this->patient;
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $byEmail = Patient::where('email', $this->email)->first();
+
+        if ($byEmail) {
+            if (! $byEmail->user_id) {
+                $byEmail->update(['user_id' => $this->id]);
+            }
+
+            return $byEmail;
+        }
+
+        return Patient::create([
+            'user_id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ]);
     }
     protected $fillable = [
         'name',

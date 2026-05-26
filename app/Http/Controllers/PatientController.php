@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password;
 
 class PatientController extends Controller
 {
@@ -18,12 +19,12 @@ class PatientController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
-        $patients = $query->get();
+        $patients = $query->paginate(15)->withQueryString();
 
         return view('admin.patients.index', compact('patients'));
     }
@@ -32,34 +33,40 @@ class PatientController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:patients,email',
+            'email'    => 'required|email|unique:patients,email|unique:users,email',
             'phone'    => 'nullable|string|max:20',
             'address'  => 'nullable|string|max:255',
-            'password' => 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->numbers()],
+        ], [
+            'email.unique' => 'This email is already registered.',
+            'password' => 'Password must be at least 8 characters and include uppercase, lowercase, and a number (e.g. Password1).',
         ]);
 
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'password' => Hash::make($request->password),
-            'role'     => 'patient',
-        ]);
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'phone'    => $request->phone,
+                'password' => $request->password,
+                'role'     => 'patient',
+            ]);
 
-        Patient::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'address'  => $request->address,
-            'password' => bcrypt($request->password),
-        ]);
+            Patient::create([
+                'user_id' => $user->id,
+                'name'    => $request->name,
+                'email'   => $request->email,
+                'phone'   => $request->phone,
+                'address' => $request->address,
+            ]);
+        });
 
         return back()->with('success', 'Patient added successfully.');
     }
 
     public function show(Patient $patient)
     {
-        $patient->load(['appointments', 'billings.appointment']);
+        $patient->load(['appointments.service', 'appointments.services', 'billings.appointment']);
+
         return view('admin.patients.show', compact('patient'));
     }
 
@@ -67,19 +74,27 @@ class PatientController extends Controller
     {
         $request->validate([
             'name'    => 'required|string|max:255',
-            'email'   => 'required|email|unique:patients,email,' . $patient->id,
+            'email'   => 'required|email|unique:patients,email,'.$patient->id,
             'phone'   => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
         ]);
 
         $patient->update($request->only('name', 'email', 'phone', 'address'));
 
+        if ($patient->user) {
+            $patient->user->update($request->only('name', 'email', 'phone'));
+        }
+
         return back()->with('success', 'Patient updated.');
     }
 
     public function destroy(Patient $patient)
     {
-        $patient->delete();
+        DB::transaction(function () use ($patient) {
+            $user = $patient->user;
+            $patient->delete();
+            $user?->delete();
+        });
 
         return back()->with('success', 'Patient deleted.');
     }

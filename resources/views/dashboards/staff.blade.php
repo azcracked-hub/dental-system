@@ -3,7 +3,7 @@
 @section('content')
 
 <!-- Root component for Alpine.js Tab State -->
-<div x-data="{ activeTab: 'today', searchParams: '' }">
+<div x-data="{ activeTab: '{{ request('tab', 'today') }}', searchParams: '' }">
 
     <!-- Flash Messages -->
     @if(session('success'))
@@ -108,7 +108,7 @@
                 @foreach($todayAppointments as $apt)
                     <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex justify-between items-center">
                         <div>
-                            <h4 class="font-bold text-gray-800">{{ $apt->service->name ?? 'General Service' }}</h4>
+                            <h4 class="font-bold text-gray-800">{{ $apt->serviceNames() }}</h4>
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                                 {{ $apt->patient->name }}
@@ -134,18 +134,18 @@
 
         <div class="mb-4">
             <h2 class="text-lg font-bold text-gray-800">All Appointments</h2>
-            <p class="text-sm text-gray-500">{{ $allAppointments->count() }} total records</p>
+            <p class="text-sm text-gray-500">{{ $allAppointments->total() }} total records</p>
         </div>
 
         <div class="space-y-4">
             @foreach($allAppointments as $apt)
                 <!-- The x-show logic applies the search filter to patient, doctor, and service names -->
-                <div x-show="searchParams === '' || '{{ strtolower($apt->patient->name ?? '') }}'.includes(searchParams.toLowerCase()) || '{{ strtolower($apt->doctor->name ?? '') }}'.includes(searchParams.toLowerCase()) || '{{ strtolower($apt->service->name ?? '') }}'.includes(searchParams.toLowerCase())"
+                <div x-show="searchParams === '' || '{{ strtolower($apt->patient->name ?? '') }}'.includes(searchParams.toLowerCase()) || '{{ strtolower($apt->doctor->name ?? '') }}'.includes(searchParams.toLowerCase()) || '{{ strtolower($apt->serviceNames()) }}'.includes(searchParams.toLowerCase())"
                      class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex justify-between items-start">
                     <div class="space-y-3 w-full">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <h4 class="font-bold text-gray-800">{{ $apt->service->name ?? 'General Service' }}</h4>
+                                <h4 class="font-bold text-gray-800">{{ $apt->serviceNames() }}</h4>
 
                                 <!-- Status Badges -->
                                 @if($apt->status == 'confirmed')
@@ -154,9 +154,9 @@
                                     <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-blue-200">completed</span>
                                 @elseif($apt->status == 'pending')
                                     <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-200">pending</span>
-                               @elseif($apt->status == 'cancelled')
+                               @elseif($apt->status == 'canceled')
                                     <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-red-200">
-                                        cancelled
+                                        canceled
                                     </span>
                                 @else
                                     <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-gray-200">
@@ -165,7 +165,7 @@
                                 @endif
                             </div>
 
-                            <!-- Cancel Button (Only if not completed or cancelled) -->
+                            <!-- Cancel Button (Only if not completed or canceled) -->
                             @if($apt->status === 'pending' || $apt->status === 'confirmed')
                                 <form action="{{ route('staff.appointments.cancel', $apt->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
                                     @csrf
@@ -199,6 +199,8 @@
                 </div>
             @endforeach
         </div>
+
+        <x-list-pagination :paginator="$allAppointments->appends(['tab' => 'all'])" />
     </div>
 
     <!-- TAB: Patient Records -->
@@ -225,6 +227,8 @@
                 </div>
             @endforeach
         </div>
+
+        <x-list-pagination :paginator="$patients->appends(['tab' => 'patients'])" />
     </div>
 
     <!-- TAB: Billing Records -->

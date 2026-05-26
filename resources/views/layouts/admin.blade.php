@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estandarte Dental — Admin</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'DM Sans', sans-serif; } </style>
 </head>
@@ -12,10 +13,9 @@
 <body class="bg-gray-50 min-h-screen">
 <div class="flex min-h-screen">
 
-    {{-- SIDEBAR --}}
+    {{-- SIDEBAR — wire:navigate for SPA; wire:current for active state --}}
     <aside class="w-60 bg-gray-900 text-white flex flex-col fixed top-0 left-0 h-full z-30">
 
-        {{-- Logo --}}
         <div class="px-5 py-5 border-b border-gray-800 flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-[#0d0d0d] border border-yellow-500/30 flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
@@ -28,12 +28,12 @@
             </div>
         </div>
 
-        {{-- Nav --}}
         <nav class="flex-1 px-3 py-4 space-y-0.5">
+            @php
+                $navClass = 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all data-current:bg-gray-800 data-current:text-white text-gray-400 hover:bg-gray-800 hover:text-white';
+            @endphp
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('admin.dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.dashboard') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7" stroke-width="2" rx="1"/>
                     <rect x="14" y="3" width="7" height="7" stroke-width="2" rx="1"/>
@@ -43,9 +43,7 @@
                 Overview
             </a>
 
-            <a href="{{ route('admin.appointments.index') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('appointments*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.appointments.index') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
@@ -55,18 +53,14 @@
                 Appointments
             </a>
 
-            <a href="{{ route('admin.clinical-notes.index') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('clinical-notes*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.clinical-notes.index') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Clinical Notes
             </a>
 
-            <a href="{{ route('admin.billing.index') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('billing*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.billing.index') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
                     <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
@@ -74,30 +68,24 @@
                 Billing
             </a>
 
-            <a href="{{ route('admin.patients.index') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('patients*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.patients.index') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 Patients
             </a>
 
-            <a href="{{ route('admin.system-admin.index') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-               {{ request()->is('system-admin*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('admin.system-admin.index') }}" wire:navigate.hover class="{{ $navClass }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <circle cx="12" cy="12" r="3" stroke-width="2"/>
                 </svg>
                 System Admin
             </a>
-
         </nav>
 
-        {{-- Bottom: Profile + Logout --}}
         <div class="px-3 py-4 border-t border-gray-800 space-y-0.5">
-            <button onclick="document.getElementById('profileModal').classList.remove('hidden')"
+            <button type="button" onclick="document.getElementById('profileModal').classList.remove('hidden')"
                 class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -116,13 +104,9 @@
                 </button>
             </form>
         </div>
-
     </aside>
 
-    {{-- MAIN --}}
     <div class="flex-1 ml-60 flex flex-col min-h-screen">
-
-        {{-- TOP BAR --}}
         <header class="bg-gray-900 text-white px-8 py-4 flex items-center justify-between sticky top-0 z-20">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center">
@@ -140,31 +124,28 @@
                     </p>
                 </div>
             </div>
-
             <div class="text-right">
                 <p class="text-sm font-semibold">{{ now()->format('l') }}</p>
                 <p class="text-xs text-gray-400">{{ now()->format('M j, Y') }}</p>
             </div>
         </header>
 
-        {{-- PAGE CONTENT --}}
-        <main class="flex-1 p-6 overflow-y-auto">
-            @yield('content')
+        {{-- No overflow-y-auto here — prevents modal clipping --}}
+        <main class="flex-1 p-6">
+            {{ $slot }}
         </main>
-
     </div>
-
 </div>
 
-{{-- Profile Settings Modal --}}
-<div id="profileModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+{{-- Profile modal lives outside main/sidebar so wire:navigate never destroys it --}}
+<div id="profileModal" wire:ignore class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative z-[201]">
         <div class="flex items-center justify-between mb-1">
             <div>
                 <h2 class="text-base font-bold text-gray-900">Profile Settings</h2>
                 <p class="text-sm text-gray-400">Update your personal information and credentials</p>
             </div>
-            <button onclick="document.getElementById('profileModal').classList.add('hidden')"
+            <button type="button" onclick="document.getElementById('profileModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
         </div>
         <form action="{{ route('admin.profile.update') }}" method="POST" class="space-y-4 mt-4">
@@ -218,6 +199,7 @@
     </div>
 </div>
 
+@livewireScripts
 @stack('scripts')
 </body>
 </html>

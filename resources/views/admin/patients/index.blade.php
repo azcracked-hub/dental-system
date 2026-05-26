@@ -8,11 +8,22 @@
     </div>
 @endif
 
+@if($errors->any())
+    <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+        <p class="font-semibold mb-1">Could not add patient. Please fix the following:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-xl font-bold text-gray-900">Patients</h1>
         <p class="text-sm text-gray-400">
-            {{ $patients->count() }} result(s)
+            {{ $patients->total() }} result(s)
             @if(request('search'))
                 for "{{ request('search') }}"
             @endif
@@ -84,8 +95,10 @@
     @endforelse
 </div>
 
+<x-list-pagination :paginator="$patients" />
+
 {{-- Add Patient Modal --}}
-<div id="createPatientModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+<div id="createPatientModal" class="{{ $errors->any() ? '' : 'hidden' }} fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-base font-bold text-gray-900">Add New Patient</h2>
@@ -96,27 +109,31 @@
             @csrf
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
-                <input type="text" name="name" required placeholder="Juan Dela Cruz"
-                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                <input type="text" name="name" required placeholder="Juan Dela Cruz" value="{{ old('name') }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 @error('name') border-red-400 @enderror">
+                @error('name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Email</label>
-                <input type="email" name="email" required placeholder="juan@email.com"
-                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                <input type="email" name="email" required placeholder="juan@email.com" value="{{ old('email') }}"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 @error('email') border-red-400 @enderror">
+                @error('email') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Phone</label>
-                <input type="text" name="phone" placeholder="+63 9XX XXX XXXX"
+                <input type="text" name="phone" placeholder="+63 9XX XXX XXXX" value="{{ old('phone') }}"
                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Password</label>
-                <input type="password" name="password" required placeholder="Set password"
-                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                <input type="password" name="password" required placeholder="e.g. Password1"
+                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 @error('password') border-red-400 @enderror">
+                <p class="text-xs text-gray-400 mt-1">At least 8 characters with uppercase, lowercase, and a number (example: <strong>Password1</strong>).</p>
+                @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Address</label>
-                <input type="text" name="address" placeholder="Street, City"
+                <input type="text" name="address" placeholder="Street, City" value="{{ old('address') }}"
                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
             </div>
             <div class="flex gap-3 pt-1">

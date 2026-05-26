@@ -34,9 +34,9 @@ class BillingController extends Controller
         Billing::create([
             'appointment_id' => $appointment->id,
             'patients_id'    => $appointment->patients_id,
-            'amount'         => $request->amount ?? $appointment->service->price,
+            'amount'         => $request->amount ?? $appointment->service?->price ?? 0,
             'status'         => 'unpaid',
-            'description'    => $appointment->service->name,
+            'description'    => $appointment->service?->name ?? 'Appointment',
         ]);
 
         return back()->with('success', 'Billing record created.');
@@ -44,20 +44,15 @@ class BillingController extends Controller
 
     public function markPaid(Request $request, int $id)
     {
+        $request->validate([
+            'payment_method' => 'required|in:cash,gcash,bank_transfer',
+        ]);
+
         $billing = Billing::findOrFail($id);
-
-        // normalize ALL payment methods to snake_case
-        $method = strtolower($request->payment_method);
-
-        $allowed = ['cash', 'gcash', 'bank_transfer'];
-
-        if (!in_array($method, $allowed)) {
-            $method = 'cash';
-        }
 
         $billing->update([
             'status' => 'paid',
-            'payment_method' => $method,
+            'payment_method' => $request->payment_method,
         ]);
 
         return back()->with('success', 'Marked as paid.');
