@@ -1,11 +1,15 @@
 @if (session('success'))
-    <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm" wire:key="flash-success">
-        {{ session('success') }}
-    </div>
+    <x-ui.alert type="success">{{ session('success') }}</x-ui.alert>
 @endif
 
 @if (session('error'))
-    <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm" wire:key="flash-error">
-        {{ session('error') }}
-    </div>
+    <x-ui.alert type="error">{{ session('error') }}</x-ui.alert>
+@endif
+
+@if (session('warning'))
+    <x-ui.alert type="warning">{{ session('warning') }}</x-ui.alert>
+@endif
+
+@if (session('info'))
+    <x-ui.alert type="info">{{ session('info') }}</x-ui.alert>
 @endif

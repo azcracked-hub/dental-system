@@ -2,6 +2,15 @@
 
 @section('content')
 
+<x-ui.flash />
+
+<div id="service-limit-notice" class="hidden mb-4 px-4 py-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-sm flex items-center gap-2" role="alert">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <span>You can select up to 3 services only.</span>
+</div>
+
 {{-- Back + Header --}}
 <div class="mb-6">
     <a href="{{ route('patient.dashboard') }}"
@@ -226,13 +235,21 @@ function updateServiceSelectionUI() {
     }
 }
 
+function showServiceLimitNotice() {
+    const notice = document.getElementById('service-limit-notice');
+    if (!notice) return;
+    notice.classList.remove('hidden');
+    clearTimeout(window._serviceLimitTimer);
+    window._serviceLimitTimer = setTimeout(() => notice.classList.add('hidden'), 4000);
+}
+
 document.querySelectorAll('.service-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function () {
         const id = this.value;
         if (this.checked) {
             if (selectedServices.length >= 3) {
                 this.checked = false;
-                alert('You can select up to 3 services only.');
+                showServiceLimitNotice();
                 return;
             }
             if (!selectedServices.includes(id)) {

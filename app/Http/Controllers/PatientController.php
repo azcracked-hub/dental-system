@@ -6,6 +6,7 @@ use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class PatientController extends Controller
@@ -74,16 +75,25 @@ class PatientController extends Controller
     {
         $request->validate([
             'name'    => 'required|string|max:255',
-            'email'   => 'required|email|unique:patients,email,'.$patient->id,
+            'email'   => [
+                'required',
+                'email',
+                Rule::unique('patients', 'email')->ignore($patient->id),
+                Rule::unique('users', 'email')->ignore($patient->user_id),
+            ],
             'phone'   => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
+        ], [
+            'email.unique' => 'This email is already registered to another account.',
         ]);
 
-        $patient->update($request->only('name', 'email', 'phone', 'address'));
+        DB::transaction(function () use ($request, $patient) {
+            $patient->update($request->only('name', 'email', 'phone', 'address'));
 
-        if ($patient->user) {
-            $patient->user->update($request->only('name', 'email', 'phone'));
-        }
+            if ($patient->user) {
+                $patient->user->update($request->only('name', 'email', 'phone'));
+            }
+        });
 
         return back()->with('success', 'Patient updated.');
     }

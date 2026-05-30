@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\WithAlerts;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.admin')]
 class PatientsIndex extends Component
 {
+    use WithAlerts;
     use WithPagination;
 
     #[Url]
@@ -77,7 +79,7 @@ class PatientsIndex extends Component
         $this->reset(['name', 'email', 'phone', 'address', 'password']);
         $this->showCreateModal = false;
         $this->resetPage();
-        session()->flash('success', 'Patient added successfully.');
+        $this->alertSuccess('Patient added successfully.');
     }
 
     public function deletePatient(int $id): void
@@ -90,7 +92,7 @@ class PatientsIndex extends Component
             $user?->delete();
         });
 
-        session()->flash('success', 'Patient deleted.');
+        $this->alertSuccess('Patient deleted.');
         $this->resetPage();
     }
 

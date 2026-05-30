@@ -2,13 +2,18 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\WithAlerts;
 use App\Models\Patient;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts.admin')]
 class PatientShow extends Component
 {
+    use WithAlerts;
+
     public Patient $patient;
     public bool $showEditModal = false;
 
@@ -45,30 +50,39 @@ class PatientShow extends Component
     {
         $validated = $this->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:patients,email,' . $this->patient->id,
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('patients', 'email')->ignore($this->patient->id),
+                Rule::unique('users', 'email')->ignore($this->patient->user_id),
+            ],
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
+        ], [
+            'email.unique' => 'This email is already registered to another account.',
         ]);
 
-        $this->patient->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?: null,
-            'address' => $validated['address'] ?: null,
-        ]);
-
-        if ($this->patient->user) {
-            $this->patient->user->update([
+        DB::transaction(function () use ($validated): void {
+            $this->patient->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?: null,
+                'address' => $validated['address'] ?: null,
             ]);
-        }
+
+            if ($this->patient->user) {
+                $this->patient->user->update([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'] ?: null,
+                ]);
+            }
+        });
 
         $this->patient->refresh();
         $this->fillPatientForm();
         $this->showEditModal = false;
-        session()->flash('success', 'Patient updated.');
+        $this->alertSuccess('Patient updated.');
     }
 
     private function fillPatientForm(): void

@@ -159,7 +159,7 @@
             window.adminDashboardChart = new window.Chart(canvas, {
                 type: 'pie',
                 data: {
-                    labels: ['Confirmed', 'Pending', 'Completed', 'Cancelled'],
+                    labels: ['Confirmed', 'Pending', 'Completed', 'Canceled'],
                     datasets: [{
                         data: [confirmed, pending, completed, canceled],
                         backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],

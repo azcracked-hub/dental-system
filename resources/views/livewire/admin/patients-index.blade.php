@@ -54,13 +54,19 @@
                     >
                         View
                     </a>
-                    <button
-                        wire:click="deletePatient({{ $patient->id }})"
-                        wire:confirm="Delete this patient?"
-                        class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
+                    <x-ui.confirm-button
+                        wireMethod="deletePatient"
+                        :param="$patient->id"
+                        title="Delete patient?"
+                        message="This will permanently remove the patient and their login account."
+                        confirmLabel="Delete"
                     >
-                        Delete
-                    </button>
+                        <x-slot name="trigger">
+                            <button type="button" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                                Delete
+                            </button>
+                        </x-slot>
+                    </x-ui.confirm-button>
                 </div>
             </div>
         @empty

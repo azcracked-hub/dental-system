@@ -41,7 +41,7 @@
                 <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
             </div>
             <div>
-                <p class="text-3xl font-semibold text-gray-800">P{{ number_format($stats['unpaid_sum'], 0) }}</p>
+                <p class="text-3xl font-semibold text-gray-800">₱{{ number_format($stats['unpaid_sum'], 0) }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $stats['unpaid_count'] }} bill(s)</p>
             </div>
         </div>
@@ -167,14 +167,20 @@
                                 </div>
 
                                 @if($apt->status === 'pending' || $apt->status === 'confirmed')
-                                    <button
-                                        type="button"
-                                        wire:click="cancelAppointment({{ $apt->id }})"
-                                        wire:confirm="Are you sure you want to cancel this appointment?"
-                                        class="text-red-500 hover:bg-red-50 border border-red-500 font-medium rounded-lg text-xs px-4 py-1.5 transition"
+                                    <x-ui.confirm-button
+                                        wireMethod="cancelAppointment"
+                                        :param="$apt->id"
+                                        title="Cancel appointment?"
+                                        message="Are you sure you want to cancel this appointment?"
+                                        confirmLabel="Cancel appointment"
+                                        variant="primary"
                                     >
-                                        Cancel
-                                    </button>
+                                        <x-slot name="trigger">
+                                            <button type="button" class="text-red-500 hover:bg-red-50 border border-red-500 font-medium rounded-lg text-xs px-4 py-1.5 transition">
+                                                Cancel
+                                            </button>
+                                        </x-slot>
+                                    </x-ui.confirm-button>
                                 @endif
                             </div>
 
@@ -261,7 +267,7 @@
 
                         <div class="grid grid-cols-2 text-sm">
                             <div class="text-gray-500">Amount:</div>
-                            <div class="text-right font-medium text-gray-800">P{{ number_format($bill->amount, 0) }}</div>
+                            <div class="text-right font-medium text-gray-800">₱{{ number_format($bill->amount, 0) }}</div>
 
                             <div class="text-gray-500 mt-2">Payment Method:</div>
                             @php

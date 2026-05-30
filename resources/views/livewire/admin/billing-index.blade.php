@@ -53,13 +53,19 @@
                         >
                             Mark as Paid
                         </button>
-                        <button
-                            wire:click="deleteBilling({{ $bill->id }})"
-                            wire:confirm="Delete this billing record?"
-                            class="border border-red-200 text-red-400 hover:bg-red-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition"
+                        <x-ui.confirm-button
+                            wireMethod="deleteBilling"
+                            :param="$bill->id"
+                            title="Delete billing record?"
+                            message="This billing record will be permanently removed."
+                            confirmLabel="Delete"
                         >
-                            Delete
-                        </button>
+                            <x-slot name="trigger">
+                                <button type="button" class="border border-red-200 text-red-400 hover:bg-red-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition">
+                                    Delete
+                                </button>
+                            </x-slot>
+                        </x-ui.confirm-button>
                     </div>
                 @endif
             </div>

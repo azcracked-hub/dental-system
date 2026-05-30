@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\WithAlerts;
 use App\Models\Appointment;
-use App\Models\Billing;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\User;
 use App\Rules\NoDoubleBooking;
 use App\Rules\ValidDoctorUser;
 use App\Services\AppointmentService as AppointmentBookingService;
+use App\Services\BillingService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -17,6 +18,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.admin')]
 class AppointmentsIndex extends Component
 {
+    use WithAlerts;
     use WithPagination;
 
     public bool $showCreateModal = false;
@@ -64,6 +66,7 @@ class AppointmentsIndex extends Component
 
         if (count($this->service_ids) >= 3) {
             $this->addError('service_ids', 'You can select up to 3 services only.');
+            $this->alertWarning('You can select up to 3 services only.');
             return;
         }
 
@@ -96,7 +99,7 @@ class AppointmentsIndex extends Component
 
         $this->showCreateModal = false;
         $this->resetCreateForm();
-        session()->flash('success', 'Appointment created successfully.');
+        $this->alertSuccess('Appointment created successfully.');
     }
 
     public function openCompleteModal(int $appointmentId): void
@@ -124,7 +127,7 @@ class AppointmentsIndex extends Component
         $appointment = Appointment::findOrFail($validated['completeAppointmentId']);
         if (in_array($appointment->status, ['completed', 'canceled'], true)) {
             $this->closeCompleteModal();
-            session()->flash('error', 'Only active appointments can be completed.');
+            $this->alertError('Only active appointments can be completed.');
             return;
         }
 
@@ -134,7 +137,7 @@ class AppointmentsIndex extends Component
         ]);
 
         $this->closeCompleteModal();
-        session()->flash('success', 'Appointment completed and notes saved.');
+        $this->alertSuccess('Appointment completed and notes saved.');
     }
 
     public function openBillingModal(int $appointmentId): void
@@ -152,38 +155,35 @@ class AppointmentsIndex extends Component
         $this->reset(['billingAppointmentId', 'billingAmount']);
     }
 
-    public function createBilling(): void
+    public function createBilling(BillingService $billingService): void
     {
         $validated = $this->validate([
             'billingAppointmentId' => 'required|exists:appointments,id',
             'billingAmount' => 'nullable|numeric|min:0',
         ]);
 
-        $existing = Billing::where('appointment_id', $validated['billingAppointmentId'])->first();
-        if ($existing) {
-            $this->closeBillingModal();
-            session()->flash('success', 'Billing already exists for this appointment.');
-            return;
-        }
-
         $appointment = Appointment::with(['patient', 'service', 'services'])
             ->findOrFail($validated['billingAppointmentId']);
-        if ($appointment->status === 'canceled') {
+
+        try {
+            $result = $billingService->createFromAppointment(
+                $appointment,
+                $validated['billingAmount'] !== null ? (float) $validated['billingAmount'] : null
+            );
+        } catch (\InvalidArgumentException $e) {
             $this->closeBillingModal();
-            session()->flash('error', 'Cannot create billing for canceled appointments.');
+            $this->alertError($e->getMessage());
             return;
         }
 
-        Billing::create([
-            'appointment_id' => $appointment->id,
-            'patients_id' => $appointment->patients_id,
-            'amount' => $validated['billingAmount'] ?? $appointment->service?->price ?? 0,
-            'status' => 'unpaid',
-            'description' => $appointment->serviceNames(),
-        ]);
-
         $this->closeBillingModal();
-        session()->flash('success', 'Billing record created.');
+
+        if ($result['existed']) {
+            $this->alertWarning('Billing already exists for this appointment.');
+            return;
+        }
+
+        $this->alertSuccess('Billing record created.');
     }
 
     public function render()

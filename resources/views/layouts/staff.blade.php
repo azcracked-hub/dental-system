@@ -38,6 +38,7 @@
     </main>
 
     @livewireScripts
+    <x-ui.toast-host />
     @stack('scripts')
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Staff;
 
+use App\Livewire\Concerns\WithAlerts;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\Patient;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.staff')]
 class Dashboard extends Component
 {
+    use WithAlerts;
     use WithPagination;
 
     #[Url(as: 'tab')]
@@ -46,14 +48,14 @@ class Dashboard extends Component
         $appointment = Appointment::findOrFail($id);
 
         if (in_array($appointment->status, ['completed', 'canceled'], true)) {
-            session()->flash('error', 'Cannot cancel a completed or already canceled appointment.');
+            $this->alertError('Cannot cancel a completed or already canceled appointment.');
 
             return;
         }
 
         $appointment->update(['status' => 'canceled']);
 
-        session()->flash('success', 'Appointment has been canceled successfully.');
+        $this->alertSuccess('Appointment has been canceled successfully.');
     }
 
     public function render()

@@ -48,20 +48,26 @@
                         {{ $nextAppointment->status }}
                     </span>
                 </div>
-                <button
-                    type="button"
-                    wire:click="cancelAppointment({{ $nextAppointment->id }})"
-                    wire:confirm="Cancel this appointment?"
-                    @disabled(in_array($nextAppointment->status, ['completed', 'canceled']))
-                    class="text-sm px-4 py-1.5 rounded-lg transition-all
-                    {{ in_array($nextAppointment->status, ['completed', 'canceled'])
-                        ? 'text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed'
-                        : 'text-red-500 border border-red-300 hover:bg-red-50' }}"
-                >
-                    {{ in_array($nextAppointment->status, ['completed', 'canceled'])
-                        ? 'Cannot Cancel'
-                        : 'Cancel Appointment' }}
-                </button>
+                @if($nextAppointment && ! in_array($nextAppointment->status, ['completed', 'canceled']))
+                    <x-ui.confirm-button
+                        wireMethod="cancelAppointment"
+                        :param="$nextAppointment->id"
+                        title="Cancel appointment?"
+                        message="Your upcoming appointment will be marked as canceled."
+                        confirmLabel="Yes, cancel"
+                        variant="primary"
+                    >
+                        <x-slot name="trigger">
+                            <button type="button" class="text-sm px-4 py-1.5 rounded-lg transition-all text-red-500 border border-red-300 hover:bg-red-50">
+                                Cancel Appointment
+                            </button>
+                        </x-slot>
+                    </x-ui.confirm-button>
+                @elseif($nextAppointment)
+                    <button type="button" disabled class="text-sm px-4 py-1.5 rounded-lg text-gray-400 border border-gray-200 bg-gray-50 cursor-not-allowed">
+                        Cannot Cancel
+                    </button>
+                @endif
             @else
                 <div class="flex flex-col items-center justify-center py-10 text-gray-400">
                     <svg class="w-14 h-14 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +113,7 @@
                         <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
                     </svg>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">P{{ number_format($pendingBalance, 0) }}</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-1">₱{{ number_format($pendingBalance, 0) }}</h2>
                 <p class="text-xs text-gray-400">{{ $unpaidBills }} unpaid bill(s)</p>
             </div>
         </div>
@@ -226,14 +232,20 @@
                     </div>
 
                     @if(in_array($appt->status, ['confirmed', 'pending'], true))
-                        <button
-                            type="button"
-                            wire:click="cancelAppointment({{ $appt->id }})"
-                            wire:confirm="Cancel this appointment?"
-                            class="mt-3 text-xs px-3 py-1.5 rounded-lg transition-all text-red-500 border border-red-300 hover:bg-red-50"
+                        <x-ui.confirm-button
+                            wireMethod="cancelAppointment"
+                            :param="$appt->id"
+                            title="Cancel appointment?"
+                            message="This appointment will be marked as canceled."
+                            confirmLabel="Cancel"
+                            variant="primary"
                         >
-                            Cancel Appointment
-                        </button>
+                            <x-slot name="trigger">
+                                <button type="button" class="mt-3 text-xs px-3 py-1.5 rounded-lg transition-all text-red-500 border border-red-300 hover:bg-red-50">
+                                    Cancel Appointment
+                                </button>
+                            </x-slot>
+                        </x-ui.confirm-button>
                     @endif
                 </div>
             @empty
@@ -312,7 +324,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-base font-bold text-yellow-600">
-                                P{{ number_format($bill->amount, 0) }}
+                                ₱{{ number_format($bill->amount, 0) }}
                             </p>
                             <span class="text-xs px-2 py-0.5 rounded-full font-medium
                                 @if($bill->status === 'paid') bg-green-100 text-green-700

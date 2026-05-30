@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Billing;
 use App\Models\Appointment;
+use App\Services\BillingService;
 use Illuminate\Http\Request;
 
 class BillingController extends Controller
@@ -16,28 +17,29 @@ class BillingController extends Controller
 
         return view('admin.billing.index', compact('billings'));
     }
-    public function store(Request $request)
+
+    public function store(Request $request, BillingService $billingService)
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
             'amount' => 'nullable|numeric|min:0',
         ]);
 
-        $existing = Billing::where('appointment_id', $request->appointment_id)->first();
+        $appointment = Appointment::with(['patient', 'service', 'services'])
+            ->findOrFail($request->appointment_id);
 
-        if ($existing) {
-            return back()->with('success', 'Billing already exists for this appointment.');
+        try {
+            $result = $billingService->createFromAppointment(
+                $appointment,
+                $request->filled('amount') ? (float) $request->amount : null
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
         }
 
-        $appointment = Appointment::with(['patient', 'service'])->findOrFail($request->appointment_id);
-
-        Billing::create([
-            'appointment_id' => $appointment->id,
-            'patients_id'    => $appointment->patients_id,
-            'amount'         => $request->amount ?? $appointment->service?->price ?? 0,
-            'status'         => 'unpaid',
-            'description'    => $appointment->service?->name ?? 'Appointment',
-        ]);
+        if ($result['existed']) {
+            return back()->with('warning', 'Billing already exists for this appointment.');
+        }
 
         return back()->with('success', 'Billing record created.');
     }
@@ -61,6 +63,7 @@ class BillingController extends Controller
     public function destroy(int $id)
     {
         Billing::findOrFail($id)->delete();
+
         return back()->with('success', 'Billing record deleted.');
     }
 }

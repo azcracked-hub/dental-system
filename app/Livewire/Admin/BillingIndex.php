@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\WithAlerts;
 use App\Models\Billing;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.admin')]
 class BillingIndex extends Component
 {
+    use WithAlerts;
     use WithPagination;
 
     public bool $showMarkPaidModal = false;
@@ -45,13 +47,13 @@ class BillingIndex extends Component
         ]);
 
         $this->closeMarkPaidModal();
-        session()->flash('success', 'Marked as paid.');
+        $this->alertSuccess('Marked as paid.');
     }
 
     public function deleteBilling(int $id): void
     {
         Billing::findOrFail($id)->delete();
-        session()->flash('success', 'Billing record deleted.');
+        $this->alertSuccess('Billing record deleted.');
         $this->resetPage();
     }
 
