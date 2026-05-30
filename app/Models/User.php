@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -37,6 +38,16 @@ class User extends Authenticatable
     public static function doctors()
     {
         return static::where('role', 'admin')->orderBy('name');
+    }
+
+    public function clinicNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function resolvePatientRecord(): Patient

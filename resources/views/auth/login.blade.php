@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Estandarte Dental Clinic</title>
+    <x-clinic-favicon />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,17 +46,7 @@
     <div class="bg-white rounded-2xl w-full max-w-[460px] px-9 py-10 text-center border border-gold/10"
          style="box-shadow: 0 8px 40px rgba(0,0,0,.10), 0 1px 0 rgba(201,168,76,.15);">
 
-        {{-- Logo --}}
-        <div class="w-[100px] h-[100px] mx-auto mb-5 rounded-[14px] overflow-hidden shadow-lg">
-            {{-- <img src="{{ asset('images/logo.png') }}" alt="Estandarte Dental Clinic Logo" class="w-full h-full object-cover"> --}}
-            <div class="w-full h-full bg-[#0d0d0d] flex items-center justify-center">
-                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16">
-                    <path d="M32 8C22 8 14 17 14 26c0 5 2 9 4 13l4 14c1 3 3 3 4 0l2-7c1-3 2-3 4 0l2 7c1 3 3 3 4 0l4-14c2-4 4-8 4-13 0-9-8-18-18-18z" fill="#C9A84C"/>
-                    <path d="M26 24c0-3 2-5 6-5s6 2 6 5" stroke="#0d0d0d" stroke-width="1.5" stroke-linecap="round"/>
-                    <text x="32" y="58" text-anchor="middle" font-family="serif" font-size="7" fill="#C9A84C" font-style="italic">Estandarte</text>
-                </svg>
-            </div>
-        </div>
+        <x-clinic-logo size="lg" class="mx-auto mb-5" />
 
         {{-- Heading --}}
         <h1 class="font-display text-[1.65rem] font-bold text-gray-900 tracking-tight mb-1">
@@ -123,6 +114,10 @@
                     class="w-full py-3.5 rounded-full text-white text-sm font-semibold tracking-wide btn-gold border-0 cursor-pointer">
                 Sign In
             </button>
+
+            <p class="text-center mt-4 text-xs text-gray-500">
+                <a href="{{ route('password.request') }}" class="text-yellow-700 font-medium hover:underline">Forgot your password?</a>
+            </p>
         </form>
     </div>
 

@@ -68,7 +68,7 @@
                         <p class="text-sm font-semibold text-gray-900">{{ $appt->serviceNames() }}</p>
                         <p class="text-xs text-gray-400 mt-1">
                             {{ \Carbon\Carbon::parse($appt->date)->format('M d, Y') }}
-                            • {{ \Carbon\Carbon::parse($appt->time)->format('H:i') }}
+                            • <x-clinic-time :time="$appt->time" />
                         </p>
                         @if($appt->notes)
                             <p class="text-xs text-gray-500 mt-2 italic">

@@ -30,7 +30,7 @@ class AppointmentTest extends TestCase
         $response = $this->actingAs($user)->post('/patient/appointments', [
             'service_ids' => [$service->id],
             'doctor_id' => $doctor->id,
-            'date' => now()->addDay()->toDateString(),
+            'date' => $this->nextBookableDate(),
             'time' => '09:00',
         ]);
 
@@ -50,7 +50,7 @@ class AppointmentTest extends TestCase
         $response = $this->actingAs($user)->post('/patient/appointments', [
             'service_ids' => $services->pluck('id')->all(),
             'doctor_id' => $doctor->id,
-            'date' => now()->addDay()->toDateString(),
+            'date' => $this->nextBookableDate(),
             'time' => '09:00',
         ]);
 
@@ -67,7 +67,7 @@ class AppointmentTest extends TestCase
         $response = $this->actingAs($user)->post('/patient/appointments', [
             'service_ids' => $services->pluck('id')->all(),
             'doctor_id' => $doctor->id,
-            'date' => now()->addDay()->toDateString(),
+            'date' => $this->nextBookableDate(),
             'time' => '09:00',
         ]);
 
@@ -84,12 +84,22 @@ class AppointmentTest extends TestCase
             'patients_id' => $patient->id,
             'doctor_id' => $admin->id,
             'service_ids' => $services->pluck('id')->all(),
-            'date' => now()->addDay()->toDateString(),
+            'date' => $this->nextBookableDate(),
             'time' => '10:00',
         ]);
 
         $response->assertRedirect();
         $this->assertCount(3, Appointment::first()->services);
+    }
+
+    public function test_patient_dashboard_loads(): void
+    {
+        $user = User::factory()->patient()->create();
+        Patient::factory()->forUser($user)->create();
+
+        $response = $this->actingAs($user)->get('/patient/dashboard');
+
+        $response->assertOk();
     }
 
     public function test_patient_can_cancel_appointment(): void
@@ -161,7 +171,7 @@ class AppointmentTest extends TestCase
         $user = $this->createPatientUser();
         $doctor = User::factory()->admin()->create();
         $service = Service::factory()->create();
-        $date = now()->addDays(2)->toDateString();
+        $date = $this->nextBookableDate(2);
 
         Appointment::factory()->create([
             'patients_id' => Patient::factory()->create()->id,

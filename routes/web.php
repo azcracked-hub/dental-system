@@ -6,6 +6,8 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\AppointmentAvailabilityController;
 use App\Http\Controllers\PatientDashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StaffDashboardController;
@@ -15,6 +17,7 @@ use App\Livewire\Admin\ClinicalNotesIndex as AdminClinicalNotesIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\PatientShow as AdminPatientShow;
 use App\Livewire\Admin\PatientsIndex as AdminPatientsIndex;
+use App\Livewire\Admin\ScheduleIndex as AdminScheduleIndex;
 use App\Livewire\Admin\SystemAdminIndex as AdminSystemAdminIndex;
 use App\Livewire\Patient\Dashboard as PatientDashboard;
 use App\Livewire\Staff\Dashboard as StaffDashboard;
@@ -33,6 +36,11 @@ Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:5,1')->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 
 
 /*
@@ -86,8 +94,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
-    // System Admin
+    // System Admin & Schedule
     Route::get('/system-admin', AdminSystemAdminIndex::class)->name('system-admin.index');
+    Route::get('/schedule', AdminScheduleIndex::class)->name('schedule.index');
 
     // Profile
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -97,6 +106,8 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')
 
     Route::get('/dashboard',                  PatientDashboard::class)->name('dashboard');
     Route::get('/appointments/book',          [PatientDashboardController::class, 'book'])->name('appointments.book');
+    Route::get('/appointments/availability/month', [AppointmentAvailabilityController::class, 'month'])->name('appointments.availability.month');
+    Route::get('/appointments/availability/slots', [AppointmentAvailabilityController::class, 'slots'])->name('appointments.availability.slots');
     Route::post('/appointments',              [PatientDashboardController::class, 'store'])->name('appointments.store');
     Route::patch('/appointments/{id}/cancel', [PatientDashboardController::class, 'cancel'])->name('appointments.cancel');
 });

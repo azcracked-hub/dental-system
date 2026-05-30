@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Rules\NoDoubleBooking;
+use App\Rules\ValidBookableDate;
+use App\Rules\ValidBookableTime;
 use App\Rules\ValidDoctorUser;
 use App\Services\AppointmentService as AppointmentBookingService;
 use Illuminate\Http\Request;
@@ -35,8 +37,8 @@ class AppointmentController extends Controller
             'doctor_id'     => ['required', 'exists:users,id', new ValidDoctorUser],
             'service_ids'   => 'required|array|min:1|max:3',
             'service_ids.*' => 'exists:services,id',
-            'date'          => ['required', 'date', new NoDoubleBooking],
-            'time'          => 'required',
+            'date'          => ['required', 'date', 'after_or_equal:today', new ValidBookableDate, new NoDoubleBooking],
+            'time'          => ['required', new ValidBookableTime],
             'notes'         => 'nullable|string',
         ], [
             'service_ids.required' => 'Please select at least one service.',

@@ -6,6 +6,8 @@ use App\Livewire\Concerns\WithAlerts;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\User;
+use App\Services\NotificationService;
+use App\Services\SchedulingService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -20,6 +22,40 @@ class Dashboard extends Component
 
     #[Url(as: 'tab')]
     public string $activeTab = 'appointments';
+
+    public bool $showViewModal = false;
+    public bool $showRescheduleModal = false;
+    public ?int $viewAppointmentId = null;
+    public ?int $rescheduleAppointmentId = null;
+    public string $rescheduleDate = '';
+    public string $rescheduleTime = '';
+    /** @var array<string, string> */
+    public array $rescheduleSlotOptions = [];
+
+    public function updatedRescheduleDate(SchedulingService $scheduling): void
+    {
+        $this->rescheduleTime = '';
+        $this->rescheduleSlotOptions = [];
+
+        if (! $this->rescheduleAppointmentId || ! $this->rescheduleDate) {
+            return;
+        }
+
+        $appointment = Appointment::find($this->rescheduleAppointmentId);
+        if (! $appointment) {
+            return;
+        }
+
+        $reason = $scheduling->getDayBlockReason((int) $appointment->doctor_id, $this->rescheduleDate);
+        if ($reason) {
+            $this->addError('rescheduleDate', $reason);
+
+            return;
+        }
+
+        $this->resetErrorBag('rescheduleDate');
+        $this->rescheduleSlotOptions = $scheduling->getAvailableSlots((int) $appointment->doctor_id, $this->rescheduleDate);
+    }
 
     public function mount(): void
     {
@@ -60,6 +96,98 @@ class Dashboard extends Component
         $appointment->update(['status' => 'canceled']);
 
         $this->alertSuccess('Appointment canceled successfully.');
+    }
+
+    public function viewAppointment(int $id): void
+    {
+        $patientId = Auth::user()->resolvePatientRecord()->id;
+        Appointment::where('id', $id)->where('patients_id', $patientId)->firstOrFail();
+        $this->viewAppointmentId = $id;
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->viewAppointmentId = null;
+    }
+
+    public function openReschedule(int $id): void
+    {
+        $patientId = Auth::user()->resolvePatientRecord()->id;
+        $appointment = Appointment::where('id', $id)->where('patients_id', $patientId)->firstOrFail();
+        $this->rescheduleAppointmentId = $appointment->id;
+        $this->rescheduleDate = '';
+        $this->rescheduleTime = '';
+        $this->rescheduleSlotOptions = [];
+        $this->showRescheduleModal = true;
+        $this->closeViewModal();
+    }
+
+    public function closeRescheduleModal(): void
+    {
+        $this->showRescheduleModal = false;
+        $this->reset(['rescheduleAppointmentId', 'rescheduleDate', 'rescheduleTime', 'rescheduleSlotOptions']);
+    }
+
+    public function rescheduleAppointment(NotificationService $notifications, SchedulingService $scheduling): void
+    {
+        $patientId = Auth::user()->resolvePatientRecord()->id;
+        $appointment = Appointment::where('id', $this->rescheduleAppointmentId)
+            ->where('patients_id', $patientId)
+            ->firstOrFail();
+
+        if (! in_array($appointment->status, ['needs_reschedule', 'pending', 'confirmed'], true)) {
+            $this->alertError('This appointment cannot be rescheduled.');
+            return;
+        }
+
+        $this->validate([
+            'rescheduleDate' => 'required|date|after_or_equal:today',
+            'rescheduleTime' => 'required',
+        ]);
+
+        $reason = $scheduling->getDayBlockReason((int) $appointment->doctor_id, $this->rescheduleDate);
+        if ($reason) {
+            $this->addError('rescheduleDate', $reason);
+            return;
+        }
+
+        if (! $scheduling->isSlotAvailable((int) $appointment->doctor_id, $this->rescheduleDate, $this->rescheduleTime)) {
+            $this->addError('rescheduleTime', 'The selected time is not available.');
+            return;
+        }
+
+        $normalizedTime = substr($this->rescheduleTime, 0, 5);
+        $conflict = Appointment::query()
+            ->where('doctor_id', $appointment->doctor_id)
+            ->whereDate('date', $this->rescheduleDate)
+            ->where('id', '!=', $appointment->id)
+            ->whereNotIn('status', ['canceled'])
+            ->where(function ($q) use ($normalizedTime) {
+                $q->where('time', 'like', $normalizedTime.'%');
+            })
+            ->exists();
+
+        if ($conflict) {
+            $this->addError('rescheduleTime', 'This doctor already has an appointment at the selected time.');
+            return;
+        }
+
+        $appointment->update([
+            'date' => $this->rescheduleDate,
+            'time' => $this->rescheduleTime,
+            'status' => 'pending',
+        ]);
+
+        $appointment->load('doctor');
+
+        if ($appointment->doctor) {
+            $notifications->notify($appointment->doctor, 'Appointment rescheduled', 'A patient rescheduled to '.$this->rescheduleDate.'.', 'info', ['appointment_id' => $appointment->id]);
+        }
+
+        $this->alertSuccess('Appointment rescheduled successfully.');
+        $this->closeRescheduleModal();
     }
 
     public function render()
@@ -106,6 +234,10 @@ class Dashboard extends Component
             ->latest()
             ->get();
 
+        $viewAppointment = $this->viewAppointmentId
+            ? $withServices(Appointment::where('id', $this->viewAppointmentId)->where('patients_id', $patientId))->first()
+            : null;
+
         return view('livewire.patient.dashboard', compact(
             'nextAppointment',
             'appointments',
@@ -113,7 +245,8 @@ class Dashboard extends Component
             'pendingBalance',
             'unpaidBills',
             'clinicalNotes',
-            'billings'
+            'billings',
+            'viewAppointment'
         ));
     }
 }

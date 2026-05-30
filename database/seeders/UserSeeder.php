@@ -31,10 +31,10 @@ class UserSeeder extends Seeder
         );
 
         $patientUser = User::updateOrCreate(
-            ['email' => 'patient@dentalclinic.com'],
+            ['email' => 'kennethagato08@gmail.com'],
             [
-                'name'     => 'Juan Dela Cruz',
-                'password' => bcrypt('Password1'),
+                'name'     => 'Kenneth Agato',
+                'password' => bcrypt('Kenneth123'),
                 'role'     => 'patient',
                 'phone'    => '+63 923 456 7890',
             ]

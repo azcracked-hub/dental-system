@@ -126,7 +126,7 @@
 {{-- STEP 3: Date & Time --}}
 <div id="step-3" class="hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
     <h2 class="text-base font-bold text-gray-900 mb-1">Select Date & Time</h2>
-    <p class="text-sm text-gray-400 mb-5">Choose your appointment slot</p>
+    <p class="text-sm text-gray-400 mb-5">Choose your appointment slot (Mon–Sat, 8:00 AM – 4:00 PM)</p>
 
     <p class="text-xs font-semibold text-gray-700 mb-3">Select Date</p>
 
@@ -191,12 +191,18 @@ let selectedDoctor  = null;
 let selectedDate    = null;
 let selectedTime    = null;
 let calYear, calMonth;
+let monthAvailability = {};
 
-const timeSlots = [
-    '08:00','08:30','09:00','09:30','10:00','10:30',
-    '13:00','13:30','14:00','14:30','15:00','15:30',
-    '16:00','16:30','17:00'
-];
+const monthUrl = @json(route('patient.appointments.availability.month'));
+const slotsUrl = @json(route('patient.appointments.availability.slots'));
+
+const dayTitles = {
+    closed: 'Clinic closed on Sundays',
+    holiday: 'Holiday — clinic closed',
+    unavailable: 'Doctor unavailable',
+    full: 'Fully booked — no slots left',
+    past: 'Past date',
+};
 
 function updateServiceSelectionUI() {
     const count = selectedServices.length;
@@ -313,17 +319,33 @@ function goToStep(step) {
     if (step === 3) initCalendar();
 }
 
+async function fetchMonthAvailability() {
+    if (!selectedDoctor) return;
+    try {
+        const res = await fetch(
+            `${monthUrl}?doctor_id=${selectedDoctor.id}&year=${calYear}&month=${calMonth + 1}`,
+            { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        monthAvailability = data.days || {};
+    } catch (e) {
+        monthAvailability = {};
+    }
+}
+
 // ── Calendar ─────────────────────────────────────────────────
-function initCalendar() {
+async function initCalendar() {
     if (!calYear) {
         const now = new Date();
         calYear  = now.getFullYear();
         calMonth = now.getMonth();
     }
+    await fetchMonthAvailability();
     renderCalendar();
 }
 
-function renderCalendar() {
+async function renderCalendar() {
     const months = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
     document.getElementById('cal-month-label').textContent = months[calMonth] + ' ' + calYear;
@@ -347,15 +369,23 @@ function renderCalendar() {
         const isToday = date.toDateString() === today.toDateString();
         const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         const isSel   = selectedDate === dateStr;
+        const status  = monthAvailability[dateStr] || (isPast ? 'past' : 'available');
+        const blocked = ['past', 'closed', 'holiday', 'unavailable', 'full'].includes(status);
 
         let cls = 'text-xs py-1.5 text-center rounded-lg transition-all ';
-        if (isPast)     cls += 'text-gray-300 cursor-not-allowed';
-        else if (isSel) cls += 'bg-yellow-500 text-white font-bold cursor-pointer';
-        else if (isToday) cls += 'bg-yellow-100 text-yellow-700 font-semibold hover:bg-yellow-200 cursor-pointer';
-        else            cls += 'text-gray-700 hover:bg-gray-100 cursor-pointer';
+        if (blocked) {
+            cls += status === 'full' ? 'text-red-300 cursor-not-allowed line-through' : 'text-gray-300 cursor-not-allowed';
+        } else if (isSel) {
+            cls += 'bg-yellow-500 text-white font-bold cursor-pointer';
+        } else if (isToday) {
+            cls += 'bg-yellow-100 text-yellow-700 font-semibold hover:bg-yellow-200 cursor-pointer';
+        } else {
+            cls += 'text-gray-700 hover:bg-gray-100 cursor-pointer';
+        }
 
-        const click = !isPast ? `onclick="selectDate('${dateStr}')"` : '';
-        grid.innerHTML += `<div class="${cls}" ${click}>${d}</div>`;
+        const title = dayTitles[status] || '';
+        const click = !blocked ? `onclick="selectDate('${dateStr}')"` : '';
+        grid.innerHTML += `<div class="${cls}" title="${title}" ${click}>${d}</div>`;
     }
 
     // Next month filler
@@ -366,41 +396,70 @@ function renderCalendar() {
     }
 }
 
-function prevMonth() {
+async function prevMonth() {
     calMonth--;
     if (calMonth < 0) { calMonth = 11; calYear--; }
+    await fetchMonthAvailability();
     renderCalendar();
 }
 
-function nextMonth() {
+async function nextMonth() {
     calMonth++;
     if (calMonth > 11) { calMonth = 0; calYear++; }
+    await fetchMonthAvailability();
     renderCalendar();
 }
 
-function selectDate(date) {
+async function selectDate(date) {
     selectedDate = date;
     selectedTime = null;
     document.getElementById('input-date').value = date;
     renderCalendar();
 
-    // Build time slots
     const grid = document.getElementById('timeslot-grid');
-    grid.innerHTML = '';
-    timeSlots.forEach(t => {
-        grid.innerHTML += `
-            <button type="button" onclick="selectTime(this,'${t}')"
-                    class="timeslot-btn flex items-center justify-center gap-1.5 px-3 py-2.5
-                           border border-gray-200 rounded-xl text-xs font-medium text-gray-700
-                           hover:border-blue-400 hover:bg-blue-50 transition-all">
-                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                    <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                ${t}
-            </button>`;
-    });
-    document.getElementById('timeslot-section').classList.remove('hidden');
+    const section = document.getElementById('timeslot-section');
+    grid.innerHTML = '<p class="col-span-3 text-xs text-gray-400 text-center py-2">Loading slots…</p>';
+    section.classList.remove('hidden');
+
+    try {
+        const res = await fetch(
+            `${slotsUrl}?doctor_id=${selectedDoctor.id}&date=${date}`,
+            { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } }
+        );
+        const data = await res.json();
+        grid.innerHTML = '';
+
+        if (data.reason) {
+            grid.innerHTML = `<p class="col-span-3 text-xs text-red-500 text-center py-2">${data.reason}</p>`;
+            updateConfirmBtn();
+            return;
+        }
+
+        const slots = data.slots || {};
+        const entries = Object.entries(slots);
+        if (entries.length === 0) {
+            grid.innerHTML = '<p class="col-span-3 text-xs text-gray-400 text-center py-2">No available slots.</p>';
+            updateConfirmBtn();
+            return;
+        }
+
+        entries.forEach(([value, label]) => {
+            grid.innerHTML += `
+                <button type="button" onclick="selectTime(this,'${value}')"
+                        class="timeslot-btn flex items-center justify-center gap-1.5 px-3 py-2.5
+                               border border-gray-200 rounded-xl text-xs font-medium text-gray-700
+                               hover:border-blue-400 hover:bg-blue-50 transition-all">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    ${label}
+                </button>`;
+        });
+    } catch (e) {
+        grid.innerHTML = '<p class="col-span-3 text-xs text-red-500 text-center py-2">Could not load time slots.</p>';
+    }
+
     updateConfirmBtn();
 }
 

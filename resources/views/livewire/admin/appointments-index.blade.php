@@ -38,13 +38,26 @@
                     <span class="text-xs px-2.5 py-1 rounded-full font-medium
                         @if($appt->status === 'confirmed') bg-green-100 text-green-700
                         @elseif($appt->status === 'pending') bg-yellow-100 text-yellow-700
+                        @elseif($appt->status === 'needs_reschedule') bg-orange-100 text-orange-700
                         @elseif($appt->status === 'completed') bg-blue-100 text-blue-700
                         @else bg-red-100 text-red-700 @endif">
-                        {{ ucfirst($appt->status) }}
+                        {{ str_replace('_', ' ', $appt->status) }}
                     </span>
                 </div>
 
                 <div class="flex items-center gap-6 text-sm text-gray-500 mb-4">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        {{ $appt->patient->name ?? 'N/A' }}
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Dr. {{ $appt->doctor->name ?? 'N/A' }}
+                    </span>
                     <span class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
@@ -57,9 +70,14 @@
                             <circle cx="12" cy="12" r="10" stroke-width="2"/>
                             <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round"/>
                         </svg>
-                        {{ \Carbon\Carbon::parse($appt->time)->format('H:i') }}
+                        <x-clinic-time :time="$appt->time" />
                     </span>
                 </div>
+
+                <button type="button" wire:click="openViewModal({{ $appt->id }})"
+                        class="text-xs px-3 py-1.5 mb-3 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                    View Details
+                </button>
 
                 @if($appt->status !== 'completed' && $appt->status !== 'canceled')
                     <div class="flex gap-3">
@@ -181,8 +199,13 @@
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">Time</label>
-                    <input type="time" wire:model="time" required
+                    <select wire:model="time" required
                         class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                        <option value="">Select time</option>
+                        @foreach(\App\Support\ClinicTime::SLOTS as $slot)
+                            <option value="{{ $slot }}">{{ \App\Support\ClinicTime::slotLabel($slot) }}</option>
+                        @endforeach
+                    </select>
                     @error('time') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -259,5 +282,55 @@
                 </button>
             </div>
         </form>
+    </x-ui.modal>
+
+    <x-ui.modal :show="$showViewModal" maxWidth="md" close-action="closeViewModal">
+        @if($viewAppointment)
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-gray-900">Appointment Details</h2>
+                <button wire:click="closeViewModal" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <p class="text-xs text-gray-400">Patient</p>
+                    <p class="font-semibold text-gray-900">{{ $viewAppointment->patient->name ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Services</p>
+                    <p class="font-medium text-gray-800">{{ $viewAppointment->serviceNames() }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Doctor</p>
+                    <p class="font-medium text-gray-800">{{ $viewAppointment->doctor->name ?? 'N/A' }}</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <p class="text-xs text-gray-400">Date</p>
+                        <p class="font-medium text-gray-800">{{ \Carbon\Carbon::parse($viewAppointment->date)->format('l, M d, Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Time</p>
+                        <p class="font-medium text-gray-800"><x-clinic-time :time="$viewAppointment->time" /></p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Status</p>
+                    <span class="inline-block text-xs px-2.5 py-0.5 rounded-full font-medium mt-1
+                        @if($viewAppointment->status === 'confirmed') bg-green-100 text-green-700
+                        @elseif($viewAppointment->status === 'pending') bg-yellow-100 text-yellow-700
+                        @elseif($viewAppointment->status === 'needs_reschedule') bg-orange-100 text-orange-700
+                        @elseif($viewAppointment->status === 'completed') bg-blue-100 text-blue-700
+                        @else bg-red-100 text-red-700 @endif">
+                        {{ str_replace('_', ' ', $viewAppointment->status) }}
+                    </span>
+                </div>
+                @if($viewAppointment->notes)
+                    <div>
+                        <p class="text-xs text-gray-400">Notes</p>
+                        <p class="text-gray-700 bg-gray-50 rounded-xl p-3 mt-1">{{ $viewAppointment->notes }}</p>
+                    </div>
+                @endif
+            </div>
+        @endif
     </x-ui.modal>
 </div>

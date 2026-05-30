@@ -8,6 +8,8 @@ use App\Models\Patient;
 use App\Models\Service;
 use App\Models\User;
 use App\Rules\NoDoubleBooking;
+use App\Rules\ValidBookableDate;
+use App\Rules\ValidBookableTime;
 use App\Rules\ValidDoctorUser;
 use App\Services\AppointmentService as AppointmentBookingService;
 use App\Services\BillingService;
@@ -24,6 +26,9 @@ class AppointmentsIndex extends Component
     public bool $showCreateModal = false;
     public bool $showCompleteModal = false;
     public bool $showBillingModal = false;
+    public bool $showViewModal = false;
+
+    public ?int $viewAppointmentId = null;
 
     public string $patients_id = '';
     public string $doctor_id = '';
@@ -36,6 +41,18 @@ class AppointmentsIndex extends Component
     public string $completeNotes = '';
     public ?int $billingAppointmentId = null;
     public ?float $billingAmount = null;
+
+    public function openViewModal(int $appointmentId): void
+    {
+        $this->viewAppointmentId = $appointmentId;
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->viewAppointmentId = null;
+    }
 
     public function openCreateModal(): void
     {
@@ -80,8 +97,8 @@ class AppointmentsIndex extends Component
             'doctor_id' => ['required', 'exists:users,id', new ValidDoctorUser],
             'service_ids' => 'required|array|min:1|max:3',
             'service_ids.*' => 'exists:services,id',
-            'date' => ['required', 'date', new NoDoubleBooking],
-            'time' => 'required',
+            'date' => ['required', 'date', 'after_or_equal:today', new ValidBookableDate, new NoDoubleBooking],
+            'time' => ['required', new ValidBookableTime],
             'notes' => 'nullable|string',
         ], [
             'service_ids.required' => 'Please select at least one service.',
@@ -192,11 +209,16 @@ class AppointmentsIndex extends Component
             ->latest('date')
             ->paginate(15);
 
+        $viewAppointment = $this->viewAppointmentId
+            ? Appointment::with(['patient', 'service', 'services', 'doctor'])->find($this->viewAppointmentId)
+            : null;
+
         return view('livewire.admin.appointments-index', [
             'appointments' => $appointments,
             'patients' => Patient::orderBy('name')->get(),
             'services' => Service::orderBy('name')->get(),
             'doctors' => User::doctors()->get(),
+            'viewAppointment' => $viewAppointment,
         ]);
     }
 }
